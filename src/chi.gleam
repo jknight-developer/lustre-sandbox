@@ -1,5 +1,6 @@
 import gleam/dict.{type Dict}
 import gleam/int
+import gleam/float
 import gleam/list
 import gleam/result
 import gleam/uri.{type Uri}
@@ -13,6 +14,7 @@ import lustre/ui.{type Theme, Theme}
 import lustre/ui/aside
 import lustre/ui/box
 import lustre/ui/button
+import lustre/ui/centre
 import lustre/ui/classes
 import lustre/ui/colour
 import lustre/ui/icon
@@ -20,6 +22,7 @@ import lustre/ui/input
 import lustre/ui/prose
 import lustre/ui/styles
 import modem
+import plinth/javascript/global
 
 pub fn main() {
   let app = lustre.application(init, update, view)
@@ -55,9 +58,18 @@ fn init(_) -> #(Model, Effect(Msg)) {
     info: colour.blue(),
   )
 
-  let ints_dict = dict.from_list([#("icons", 5)])
+  let ints_dict = dict.from_list([#("icons", 5), #("fizzbuzz", 10)])
 
-  #(Model(Index, State(inputs: dict.new(), ints: ints_dict), theme), modem.init(on_url_change))
+  #(Model(Index, State(inputs: dict.new(), ints: ints_dict), theme), effect.batch([modem.init(on_url_change), clock(InputIncrement("fizzbuzz"))]))
+}
+
+fn clock(msg: Msg) -> Effect(Msg) {
+  effect.from(fn(dispatch) {
+    global.set_interval(1000, fn() {
+      dispatch(msg)
+    })
+    Nil
+  })
 }
 
 fn on_url_change(uri: Uri) -> Msg {
@@ -73,6 +85,7 @@ type CanvasAction {
 
 type Msg {
   OnRouteChange(Route)
+  StateReset
   CanvasDraw(CanvasAction)
   InputUpdate(String, String)
   InputIncrement(String)
@@ -80,14 +93,30 @@ type Msg {
 }
 
 fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
+  let ints_dict = dict.from_list([#("icons", 5), #("fizzbuzz", 10)])
   case model {
     Model(current_route, state, theme) -> {
       case msg {
         OnRouteChange(route) -> #(Model(route, state, theme), effect.none())
+        StateReset -> #(Model(current_route, State(inputs: dict.new(), ints: ints_dict), theme), effect.none())
         CanvasDraw(_action) -> #(Model(current_route, state, theme), effect.none())
         InputUpdate(name, value) -> #(Model(current_route, State(inputs: dict.insert(state.inputs, name, value), ints: state.ints), theme), effect.none())
-        InputIncrement(name) -> #(Model(current_route, State(inputs: state.inputs, ints: dict.map_values(state.ints, fn(_k: String, v: Int) {v + 1})), theme), effect.none())
-        InputDecrement(name) -> #(Model(current_route, State(inputs: state.inputs, ints: dict.map_values(state.ints, fn(_k: String, v: Int) {v - 1})), theme), effect.none())
+        InputIncrement(name) -> #(
+          Model(current_route,
+          State(inputs: state.inputs, ints: dict.map_values(state.ints, fn(k: String, v: Int) {case k {
+            n if n == name -> v + 1
+            _ -> v
+          }})), theme),
+          effect.none()
+        )
+        InputDecrement(name) -> #(
+          Model(current_route, 
+          State(inputs: state.inputs, ints: dict.map_values(state.ints, fn(k: String, v: Int) {case k, v {
+            n, i if n == name && i > 0 -> v - 1
+            _, _ -> v
+          }})), theme), 
+          effect.none()
+        )
       }
     }
   }
@@ -105,7 +134,7 @@ fn view(model: Model) -> Element(Msg) {
       styles.theme(model.theme),
       styles.elements(),
       html.div([], [
-        navbar(),
+        navbar(model),
         // Routing
         html.div([custom_styles, attribute.style([#("background", result.unwrap(dict.get(model.state.inputs, "colour"), ""))])], [
           case model {
@@ -115,12 +144,24 @@ fn view(model: Model) -> Element(Msg) {
         ]),
         html.div([
           case dict.get(model.state.inputs, "colour") {
-            Ok("red") -> attribute.style([#("background", "green")])
+            Ok("red") -> attribute.style([#("background", "#882222")])
             _ -> attribute.none()
           }], 
-          [carousel(images)]),
-        html.br([]),
-        footer(),
+          [carousel(images)]
+        ),
+        ui.centre([], html.div([], [
+          html.div([], [
+            input_box(model, "image_input", "[image_input]", [classes.text_2xl(), attribute.style([#("width", "full")]), input.primary()]),
+          ]),
+          html.div([], [
+            case dict.get(model.state.inputs, "image_input") {
+              Ok("") -> element.none()
+              Ok(img) -> raw_image(img)
+              _ -> element.none()
+            },
+          ]),
+        ])),
+        footer(model),
       ])
     ])
   ])
@@ -144,15 +185,22 @@ fn view(model: Model) -> Element(Msg) {
 //   CanvasDraw(action)
 // }
 
-fn navbar() -> Element(Msg) {
+fn navbar(model: Model) -> Element(Msg) {
   html.div([classes.shadow_md()], [
     ui.centre([], html.nav([], [
       html.a([attribute.href("/")], [
         ui.button([event.on_click(InputUpdate("colour", ""))], [element.text("Index")]),
       ]),
       html.a([],[element.text(" | ")]),
-      html.a([attribute.href("/")], [
-        ui.button([button.solid(), button.error(), event.on_click(InputUpdate("colour", "red"))], [element.text("Index but RED")]),
+      html.a([], [
+        case dict.get(model.state.inputs, "colour") {
+          Ok("red") -> ui.button([button.solid(), button.error(), event.on_click(InputUpdate("colour", ""))], [element.text("RED MODE: ON ")])
+          _ -> ui.button([button.solid(), button.error(), event.on_click(InputUpdate("colour", "red"))], [element.text("RED MODE: OFF")])
+        }
+      ]),
+      html.a([],[element.text(" | ")]),
+      html.a([], [
+        ui.button([button.solid(), button.info(), event.on_click(StateReset)], [element.text("RESET")])
       ]),
       html.a([],[element.text(" | ")]),
       html.a([attribute.href("/about")], [
@@ -185,27 +233,29 @@ fn carousel(images: List(ImageRef)) -> Element(Msg) {
   ])
 }
 
-// fn raw_image(source: String) -> Element(Msg) {
-//   imageloader(ImageRef(title: "image", location: source))
-// }
+fn raw_image(source: String) -> Element(Msg) {
+  imageloader(ImageRef(title: "image", location: source))
+}
 
 fn imageloader(image: ImageRef) -> Element(Msg) {
-  html.div([], [
+  html.div([attribute.style([#("display", "flex"), #("flex-grow", "4")])], [
     html.img([attribute.src(image.location), attribute.alt(image.title), attribute.width(500), attribute.height(600)]),
   ])
 }
 
 fn fizzbuzz(num: Int) -> List(Element(Msg)) {
-  do_fizzbuzz(num, 1, [])
+  [ui.centre([centre.inline()], html.div([attribute.style([#("display", "flex"), #("align-items", "center"), #("flex-wrap", "wrap"), #("gap", "10px")])], do_fizzbuzz(num, 1, [])))]
 }
 
 fn do_fizzbuzz(num: Int, acc: Int, textlist: List(Element(Msg))) -> List(Element(Msg)) {
   case acc {
     n if n == num + 1 -> textlist
-    n if n >= 0 && n % 15 == 0 -> do_fizzbuzz(num, acc + 1, list.flatten([textlist, [element.text("fizzbuzz ")]]))
-    n if n >= 0 && n % 3 == 0 -> do_fizzbuzz(num, acc + 1, list.flatten([textlist, [element.text("fizz ")]]))
-    n if n >= 0 && n % 5 == 0 -> do_fizzbuzz(num, acc + 1, list.flatten([textlist, [element.text("buzz ")]]))
-    n if n >= 0 -> do_fizzbuzz(num, acc + 1, list.flatten([textlist, [element.text(int.to_string(acc) <> " ")]]))
+    n if n >= 0 && n % 15 == 0 && n > 30 -> do_fizzbuzz(num, acc + 1, list.flatten([textlist, [ui.centre([], html.p([classes.text_5xl(), ], [element.text("SUPER FIZZBUZZ TIMES " <> int.to_string({n / 15} - 1) <> "!")]))]]))
+    n if n >= 0 && n % 15 == 0 && n > 15 -> do_fizzbuzz(num, acc + 1, list.flatten([textlist, [ui.centre([], html.p([classes.text_3xl()], [element.text("SUPER FIZZBUZZ!")]))]]))
+    n if n >= 0 && n % 15 == 0 -> do_fizzbuzz(num, acc + 1, list.flatten([textlist, [ui.centre([], html.p([classes.text_2xl()], [element.text("FIZZBUZZ!")]))]]))
+    n if n >= 0 && n % 3 == 0 -> do_fizzbuzz(num, acc + 1, list.flatten([textlist, [html.div([], [element.text("fizz")])]]))
+    n if n >= 0 && n % 5 == 0 -> do_fizzbuzz(num, acc + 1, list.flatten([textlist, [html.div([], [element.text("buzz")])]]))
+    n if n >= 0 -> do_fizzbuzz(num, acc + 1, list.flatten([textlist, [html.div([], [element.text(int.to_string(acc))])]]))
     _ -> panic
   }
 }
@@ -226,10 +276,12 @@ fn index(model: Model) -> Element(Msg) {
     html.div([], [
     ui.centre([], html.p([classes.text_md()], [element.text("INDEX")])),
     ui.centre([classes.mt_md()], html.p([classes.font_mono(), classes.text_lg()], [element.text("lorem ipsum whatever man who cares")])),
-    ui.aside([],
-      ui.button([event.on_click(InputDecrement("icons"))], [element.text("-")]),
-      ui.button([event.on_click(InputIncrement("icons"))], [element.text("+")]),
-    ),
+    ui.centre([], html.div([], [ 
+      ui.aside([],
+        ui.button([event.on_click(InputDecrement("icons"))], [element.text("-")]),
+        ui.button([event.on_click(InputIncrement("icons"))], [element.text("+")]),
+      ),
+    ])),
     ui.centre(
       [classes.my_lg()], 
       html.div(
@@ -261,19 +313,23 @@ fn input_box(model: Model, name: String, placeholder: String, attrs: List(Attrib
   }
 }
 
-fn about(_model: Model) -> Element(Msg) {
-  html.div([], [
+fn about(model: Model) -> Element(Msg) {
+  html.div([attribute.style([#("min-height", "80rem")])], [
     ui.prose([prose.full()], [
-      ui.centre([], html.h1([], [element.text("ABOUT ME")])),
+      ui.centre([], html.h1([classes.pb_lg()], [element.text("TRAINING ARC")])),
     ]),
-    html.div([classes.text_xl(), classes.font_mono()],
-      fizzbuzz(666),
+    ui.centre([button.warning(), classes.pb_lg()], ui.button([event.on_click(InputIncrement("fizzbuzz"))], [html.p([classes.font_alt(), classes.text_5xl()], [element.text("MORE POWER")])])),
+    html.div([classes.text_xl(), classes.font_mono(), attribute.style([#("display", "flex"), #("justify-content", "center")])],
+      fizzbuzz(result.unwrap(dict.get(model.state.ints, "fizzbuzz"), 10)),
     ),
   ])
 }
 
-fn footer() -> Element(Msg) {
-  html.div([], [
-    element.text("footer"),
+fn footer(model: Model) -> Element(Msg) {
+  html.div([attribute.style([#("height", "5rem"), #("background", case dict.get(model.state.inputs, "colour") {
+    Ok("red") -> "#552222"
+    _ -> ""
+  })])], [
+    html.p([], [element.text("footer"),])
   ])
 }

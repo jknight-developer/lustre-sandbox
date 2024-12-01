@@ -232,6 +232,9 @@ function structurallyCompatibleObjects(a2, b) {
     return false;
   return a2.constructor === b.constructor;
 }
+function divideInt(a2, b) {
+  return Math.trunc(divideFloat(a2, b));
+}
 function divideFloat(a2, b) {
   if (b === 0) {
     return 0;
@@ -342,6 +345,23 @@ function map_loop(loop$list, loop$fun, loop$acc) {
 }
 function map(list, fun) {
   return map_loop(list, fun, toList([]));
+}
+function append_loop(loop$first, loop$second) {
+  while (true) {
+    let first2 = loop$first;
+    let second = loop$second;
+    if (first2.hasLength(0)) {
+      return second;
+    } else {
+      let item = first2.head;
+      let rest$1 = first2.tail;
+      loop$first = rest$1;
+      loop$second = prepend(item, second);
+    }
+  }
+}
+function append(first2, second) {
+  return append_loop(reverse(first2), second);
 }
 function reverse_and_prepend(loop$prefix, loop$suffix) {
   while (true) {
@@ -1715,6 +1735,18 @@ function from(effect) {
 function none() {
   return new Effect(toList([]));
 }
+function batch(effects) {
+  return new Effect(
+    fold(
+      effects,
+      toList([]),
+      (b, _use1) => {
+        let a2 = _use1.all;
+        return append(b, a2);
+      }
+    )
+  );
+}
 
 // build/dev/javascript/lustre/lustre/internals/vdom.mjs
 var Text = class extends CustomType {
@@ -2629,9 +2661,6 @@ function p(attrs, children2) {
 function a(attrs, children2) {
   return element("a", attrs, children2);
 }
-function br(attrs) {
-  return element("br", attrs, toList([]));
-}
 function img(attrs) {
   return element("img", attrs, toList([]));
 }
@@ -2721,6 +2750,9 @@ function of2(element2, attributes, children2) {
 }
 function centre(attributes, children2) {
   return of2(div, attributes, children2);
+}
+function inline() {
+  return class$("inline");
 }
 
 // build/dev/javascript/gleam_community_colour/gleam_community/colour.mjs
@@ -3247,8 +3279,17 @@ function text_xl() {
 function text_2xl() {
   return class$("text-2xl");
 }
+function text_3xl() {
+  return class$("text-3xl");
+}
 function text_4xl() {
   return class$("text-4xl");
+}
+function text_5xl() {
+  return class$("text-5xl");
+}
+function pb_lg() {
+  return class$("pb-lg");
 }
 function my_lg() {
   return class$("my-lg");
@@ -3481,6 +3522,11 @@ function init2(handler) {
   );
 }
 
+// build/dev/javascript/plinth/global_ffi.mjs
+function setInterval(delay, callback) {
+  return globalThis.setInterval(callback, delay);
+}
+
 // build/dev/javascript/chi/chi.mjs
 var Index = class extends CustomType {
 };
@@ -3506,6 +3552,8 @@ var OnRouteChange = class extends CustomType {
     super();
     this[0] = x0;
   }
+};
+var StateReset = class extends CustomType {
 };
 var CanvasDraw = class extends CustomType {
   constructor(x0) {
@@ -3539,6 +3587,16 @@ var ImageRef = class extends CustomType {
     this.location = location;
   }
 };
+function clock(msg) {
+  return from(
+    (dispatch) => {
+      setInterval(1e3, () => {
+        return dispatch(msg);
+      });
+      return void 0;
+    }
+  );
+}
 function on_url_change(uri) {
   let $ = path_segments(uri.path);
   if ($.hasLength(1) && $.head === "index") {
@@ -3558,13 +3616,16 @@ function init3(_) {
     green(),
     blue()
   );
-  let ints_dict = from_list(toList([["icons", 5]]));
+  let ints_dict = from_list(toList([["icons", 5], ["fizzbuzz", 10]]));
   return [
     new Model2(new Index(), new State(new$(), ints_dict), theme2),
-    init2(on_url_change)
+    batch(
+      toList([init2(on_url_change), clock(new InputIncrement("fizzbuzz"))])
+    )
   ];
 }
 function update(model, msg) {
+  let ints_dict = from_list(toList([["icons", 5], ["fizzbuzz", 10]]));
   {
     let current_route = model.route;
     let state = model.state;
@@ -3572,6 +3633,11 @@ function update(model, msg) {
     if (msg instanceof OnRouteChange) {
       let route = msg[0];
       return [new Model2(route, state, theme2), none()];
+    } else if (msg instanceof StateReset) {
+      return [
+        new Model2(current_route, new State(new$(), ints_dict), theme2),
+        none()
+      ];
     } else if (msg instanceof CanvasDraw) {
       return [new Model2(current_route, state, theme2), none()];
     } else if (msg instanceof InputUpdate) {
@@ -3592,9 +3658,17 @@ function update(model, msg) {
           current_route,
           new State(
             state.inputs,
-            map_values(state.ints, (_, v) => {
-              return v + 1;
-            })
+            map_values(
+              state.ints,
+              (k, v) => {
+                if (k === name) {
+                  let n = k;
+                  return v + 1;
+                } else {
+                  return v;
+                }
+              }
+            )
           ),
           theme2
         ),
@@ -3607,9 +3681,18 @@ function update(model, msg) {
           current_route,
           new State(
             state.inputs,
-            map_values(state.ints, (_, v) => {
-              return v - 1;
-            })
+            map_values(
+              state.ints,
+              (k, v) => {
+                if (k === name && v > 0) {
+                  let n = k;
+                  let i = v;
+                  return v - 1;
+                } else {
+                  return v;
+                }
+              }
+            )
           ),
           theme2
         ),
@@ -3618,7 +3701,7 @@ function update(model, msg) {
     }
   }
 }
-function navbar() {
+function navbar(model) {
   return div(
     toList([shadow_md()]),
     toList([
@@ -3638,15 +3721,43 @@ function navbar() {
             ),
             a(toList([]), toList([text(" | ")])),
             a(
-              toList([href("/")]),
+              toList([]),
+              toList([
+                (() => {
+                  let $ = get(model.state.inputs, "colour");
+                  if ($.isOk() && $[0] === "red") {
+                    return button3(
+                      toList([
+                        solid(),
+                        error(),
+                        on_click(new InputUpdate("colour", ""))
+                      ]),
+                      toList([text("RED MODE: ON ")])
+                    );
+                  } else {
+                    return button3(
+                      toList([
+                        solid(),
+                        error(),
+                        on_click(new InputUpdate("colour", "red"))
+                      ]),
+                      toList([text("RED MODE: OFF")])
+                    );
+                  }
+                })()
+              ])
+            ),
+            a(toList([]), toList([text(" | ")])),
+            a(
+              toList([]),
               toList([
                 button3(
                   toList([
                     solid(),
-                    error(),
-                    on_click(new InputUpdate("colour", "red"))
+                    info(),
+                    on_click(new StateReset())
                   ]),
-                  toList([text("Index but RED")])
+                  toList([text("RESET")])
                 )
               ])
             ),
@@ -3669,7 +3780,7 @@ function navbar() {
 }
 function imageloader(image) {
   return div(
-    toList([]),
+    toList([style(toList([["display", "flex"], ["flex-grow", "4"]]))]),
     toList([
       img(
         toList([
@@ -3705,6 +3816,9 @@ function carousel(images) {
     ])
   );
 }
+function raw_image(source) {
+  return imageloader(new ImageRef("image", source));
+}
 function do_fizzbuzz(loop$num, loop$acc, loop$textlist) {
   while (true) {
     let num = loop$num;
@@ -3713,39 +3827,103 @@ function do_fizzbuzz(loop$num, loop$acc, loop$textlist) {
     if (acc === num + 1) {
       let n = acc;
       return textlist;
+    } else if (acc >= 0 && acc % 15 === 0 && acc > 30) {
+      let n = acc;
+      loop$num = num;
+      loop$acc = acc + 1;
+      loop$textlist = flatten(
+        toList([
+          textlist,
+          toList([
+            centre2(
+              toList([]),
+              p(
+                toList([text_5xl()]),
+                toList([
+                  text(
+                    "SUPER FIZZBUZZ TIMES " + to_string3(
+                      divideInt(n, 15) - 1
+                    ) + "!"
+                  )
+                ])
+              )
+            )
+          ])
+        ])
+      );
+    } else if (acc >= 0 && acc % 15 === 0 && acc > 15) {
+      let n = acc;
+      loop$num = num;
+      loop$acc = acc + 1;
+      loop$textlist = flatten(
+        toList([
+          textlist,
+          toList([
+            centre2(
+              toList([]),
+              p(
+                toList([text_3xl()]),
+                toList([text("SUPER FIZZBUZZ!")])
+              )
+            )
+          ])
+        ])
+      );
     } else if (acc >= 0 && acc % 15 === 0) {
       let n = acc;
       loop$num = num;
       loop$acc = acc + 1;
       loop$textlist = flatten(
-        toList([textlist, toList([text("fizzbuzz ")])])
+        toList([
+          textlist,
+          toList([
+            centre2(
+              toList([]),
+              p(
+                toList([text_2xl()]),
+                toList([text("FIZZBUZZ!")])
+              )
+            )
+          ])
+        ])
       );
     } else if (acc >= 0 && acc % 3 === 0) {
       let n = acc;
       loop$num = num;
       loop$acc = acc + 1;
       loop$textlist = flatten(
-        toList([textlist, toList([text("fizz ")])])
+        toList([
+          textlist,
+          toList([div(toList([]), toList([text("fizz")]))])
+        ])
       );
     } else if (acc >= 0 && acc % 5 === 0) {
       let n = acc;
       loop$num = num;
       loop$acc = acc + 1;
       loop$textlist = flatten(
-        toList([textlist, toList([text("buzz ")])])
+        toList([
+          textlist,
+          toList([div(toList([]), toList([text("buzz")]))])
+        ])
       );
     } else if (acc >= 0) {
       let n = acc;
       loop$num = num;
       loop$acc = acc + 1;
       loop$textlist = flatten(
-        toList([textlist, toList([text(to_string3(acc) + " ")])])
+        toList([
+          textlist,
+          toList([
+            div(toList([]), toList([text(to_string3(acc))]))
+          ])
+        ])
       );
     } else {
       throw makeError(
         "panic",
         "chi",
-        209,
+        259,
         "do_fizzbuzz",
         "panic expression evaluated",
         {}
@@ -3754,7 +3932,24 @@ function do_fizzbuzz(loop$num, loop$acc, loop$textlist) {
   }
 }
 function fizzbuzz(num) {
-  return do_fizzbuzz(num, 1, toList([]));
+  return toList([
+    centre2(
+      toList([inline()]),
+      div(
+        toList([
+          style(
+            toList([
+              ["display", "flex"],
+              ["align-items", "center"],
+              ["flex-wrap", "wrap"],
+              ["gap", "10px"]
+            ])
+          )
+        ]),
+        do_fizzbuzz(num, 1, toList([]))
+      )
+    )
+  ]);
 }
 function do_element_clones(loop$amount, loop$element, loop$acc) {
   while (true) {
@@ -3833,15 +4028,23 @@ function index2(model) {
               toList([text("lorem ipsum whatever man who cares")])
             )
           ),
-          aside2(
+          centre2(
             toList([]),
-            button3(
-              toList([on_click(new InputDecrement("icons"))]),
-              toList([text("-")])
-            ),
-            button3(
-              toList([on_click(new InputIncrement("icons"))]),
-              toList([text("+")])
+            div(
+              toList([]),
+              toList([
+                aside2(
+                  toList([]),
+                  button3(
+                    toList([on_click(new InputDecrement("icons"))]),
+                    toList([text("-")])
+                  ),
+                  button3(
+                    toList([on_click(new InputIncrement("icons"))]),
+                    toList([text("+")])
+                  )
+                )
+              ])
             )
           ),
           centre2(
@@ -3914,28 +4117,69 @@ function index2(model) {
     ])
   );
 }
-function about(_) {
+function about(model) {
   return div(
-    toList([]),
+    toList([style(toList([["min-height", "80rem"]]))]),
     toList([
       prose2(
         toList([full()]),
         toList([
           centre2(
             toList([]),
-            h1(toList([]), toList([text("ABOUT ME")]))
+            h1(
+              toList([pb_lg()]),
+              toList([text("TRAINING ARC")])
+            )
           )
         ])
       ),
+      centre2(
+        toList([warning(), pb_lg()]),
+        button3(
+          toList([on_click(new InputIncrement("fizzbuzz"))]),
+          toList([
+            p(
+              toList([font_alt(), text_5xl()]),
+              toList([text("MORE POWER")])
+            )
+          ])
+        )
+      ),
       div(
-        toList([text_xl(), font_mono()]),
-        fizzbuzz(666)
+        toList([
+          text_xl(),
+          font_mono(),
+          style(
+            toList([["display", "flex"], ["justify-content", "center"]])
+          )
+        ]),
+        fizzbuzz(unwrap(get(model.state.ints, "fizzbuzz"), 10))
       )
     ])
   );
 }
-function footer() {
-  return div(toList([]), toList([text("footer")]));
+function footer(model) {
+  return div(
+    toList([
+      style(
+        toList([
+          ["height", "5rem"],
+          [
+            "background",
+            (() => {
+              let $ = get(model.state.inputs, "colour");
+              if ($.isOk() && $[0] === "red") {
+                return "#552222";
+              } else {
+                return "";
+              }
+            })()
+          ]
+        ])
+      )
+    ]),
+    toList([p(toList([]), toList([text("footer")]))])
+  );
 }
 function view(model) {
   let custom_styles = style(
@@ -3958,7 +4202,7 @@ function view(model) {
           div(
             toList([]),
             toList([
-              navbar(),
+              navbar(model),
               div(
                 toList([
                   custom_styles,
@@ -3989,7 +4233,9 @@ function view(model) {
                   (() => {
                     let $1 = get(model.state.inputs, "colour");
                     if ($1.isOk() && $1[0] === "red") {
-                      return style(toList([["background", "green"]]));
+                      return style(
+                        toList([["background", "#882222"]])
+                      );
                     } else {
                       return none2();
                     }
@@ -3997,8 +4243,46 @@ function view(model) {
                 ]),
                 toList([carousel(images)])
               ),
-              br(toList([])),
-              footer()
+              centre2(
+                toList([]),
+                div(
+                  toList([]),
+                  toList([
+                    div(
+                      toList([]),
+                      toList([
+                        input_box(
+                          model,
+                          "image_input",
+                          "[image_input]",
+                          toList([
+                            text_2xl(),
+                            style(toList([["width", "full"]])),
+                            primary()
+                          ])
+                        )
+                      ])
+                    ),
+                    div(
+                      toList([]),
+                      toList([
+                        (() => {
+                          let $1 = get(model.state.inputs, "image_input");
+                          if ($1.isOk() && $1[0] === "") {
+                            return none3();
+                          } else if ($1.isOk()) {
+                            let img2 = $1[0];
+                            return raw_image(img2);
+                          } else {
+                            return none3();
+                          }
+                        })()
+                      ])
+                    )
+                  ])
+                )
+              ),
+              footer(model)
             ])
           )
         ])
@@ -4013,7 +4297,7 @@ function main() {
     throw makeError(
       "assignment_no_match",
       "chi",
-      26,
+      29,
       "main",
       "Assignment pattern did not match",
       { value: $ }
