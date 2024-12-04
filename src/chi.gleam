@@ -1,6 +1,5 @@
 import gleam/dict.{type Dict}
 import gleam/int
-import gleam/float
 import gleam/list
 import gleam/result
 import gleam/uri.{type Uri}
@@ -40,15 +39,25 @@ pub type FileName = String
 pub type FilePath = String
 
 pub type State {
-  State(inputs: Dict(String, String), ints: Dict(String, Int))
+  State(
+    route: Route,
+    theme: Theme,
+    inputs: Dict(String, String),
+    ints: Dict(String, Int),
+    carousels: Dict(String, CarouselState),
+  )
 }
+
+pub type CarouselState
 
 
 pub type Model {
-  Model(route: Route, state: State, theme: Theme)
+  Model(
+    state: State,
+  )
 }
 
-fn init(_) -> #(Model, Effect(Msg)) {
+pub fn initial_state() {
   let theme = Theme(
     primary: colour.purple(),
     greyscale: colour.grey(),
@@ -57,15 +66,32 @@ fn init(_) -> #(Model, Effect(Msg)) {
     success: colour.green(),
     info: colour.blue(),
   )
-
-  let ints_dict = dict.from_list([#("icons", 5), #("fizzbuzz", 10)])
-
-  #(Model(Index, State(inputs: dict.new(), ints: ints_dict), theme), effect.batch([modem.init(on_url_change), clock(InputIncrement("fizzbuzz"))]))
+  State(
+    route: Index,
+    theme: theme,
+    inputs: dict.new(),
+    ints: dict.from_list([#("icons", 5), #("fizzbuzz", 10)]),
+    carousels: dict.new(),
+  )
 }
 
-fn clock(msg: Msg) -> Effect(Msg) {
+fn init(_) -> #(Model, Effect(Msg)) {
+
+
+  #(
+    Model(
+      initial_state(),
+    ), 
+    effect.batch([
+      modem.init(on_url_change), 
+      set_interval(1000, IntMessage(IntIncrement("fizzbuzz")))
+    ])
+  )
+}
+
+fn set_interval(interval: Int, msg: Msg) -> Effect(Msg) {
   effect.from(fn(dispatch) {
-    global.set_interval(1000, fn() {
+    global.set_interval(interval, fn() {
       dispatch(msg)
     })
     Nil
@@ -80,66 +106,84 @@ fn on_url_change(uri: Uri) -> Msg {
   }
 }
 
-type CanvasAction {
-}
+// type CanvasAction {
+// }
 
 type Msg {
   OnRouteChange(Route)
   StateReset
-  CanvasDraw(CanvasAction)
   InputUpdate(String, String)
-  InputIncrement(String)
-  InputDecrement(String)
+  IntMessage(IntMsg)
+  CarouselMessage(CarouselMsg)
+}
+
+type IntMsg {
+  IntIncrement(String)
+  IntDecrement(String)
+}
+
+fn int_message_handler(model: Model, intmsg: IntMsg) -> #(Model, Effect(Msg)) {
+case intmsg {
+        IntIncrement(name) -> #(
+          Model(
+          State(..model.state, ints: dict.map_values(model.state.ints, fn(k: String, v: Int) {case k {
+            n if n == name -> v + 1
+            _ -> v
+          }}))),
+          effect.none()
+        )
+        IntDecrement(name) -> #(
+          Model( 
+          State(..model.state, ints: dict.map_values(model.state.ints, fn(k: String, v: Int) {case k, v {
+            n, i if n == name && i > 0 -> v - 1
+            _, _ -> v
+          }}))), 
+          effect.none()
+        )
+  }
+}
+
+type CarouselMsg {
+  NextSlide(String)
+  PreviousSlide(String)
+  GotoSlide(String, Int)
+  StartAutoSlide(String, Int)
+  PauseAutoSlide(String, Int)
+}
+
+fn carousel_message_handler(model: Model, carouselmsg: CarouselMsg) {
+  #(model, effect.none())
 }
 
 fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
-  let ints_dict = dict.from_list([#("icons", 5), #("fizzbuzz", 10)])
-  case model {
-    Model(current_route, state, theme) -> {
-      case msg {
-        OnRouteChange(route) -> #(Model(route, state, theme), effect.none())
-        StateReset -> #(Model(current_route, State(inputs: dict.new(), ints: ints_dict), theme), effect.none())
-        CanvasDraw(_action) -> #(Model(current_route, state, theme), effect.none())
-        InputUpdate(name, value) -> #(Model(current_route, State(inputs: dict.insert(state.inputs, name, value), ints: state.ints), theme), effect.none())
-        InputIncrement(name) -> #(
-          Model(current_route,
-          State(inputs: state.inputs, ints: dict.map_values(state.ints, fn(k: String, v: Int) {case k {
-            n if n == name -> v + 1
-            _ -> v
-          }})), theme),
-          effect.none()
-        )
-        InputDecrement(name) -> #(
-          Model(current_route, 
-          State(inputs: state.inputs, ints: dict.map_values(state.ints, fn(k: String, v: Int) {case k, v {
-            n, i if n == name && i > 0 -> v - 1
-            _, _ -> v
-          }})), theme), 
-          effect.none()
-        )
-      }
-    }
+  case msg {
+    OnRouteChange(route) -> #(Model(State(..model.state, route: route)), effect.none())
+    StateReset -> #(Model(initial_state()), effect.none())
+    InputUpdate(name, value) -> #(Model(State(..model.state, inputs: dict.insert(model.state.inputs, name, value))), effect.none())
+    IntMessage(intmsg) -> int_message_handler(model, intmsg)
+    CarouselMessage(carouselmsg) -> carousel_message_handler(model, carouselmsg)
   }
 }
 
 fn view(model: Model) -> Element(Msg) {
   let custom_styles = attribute.style([#("width", "full"), #("margin", "0 auto"), #("padding", "2rem")])
-  let _test_image = ImageRef(title: "mario", location: "https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:yvf7rm2mjqk4vy676fedjjra/bafkreieu7hcksyvq7k2cwyipm57pgzetdepf44a2hyrjbrrgeegqnknx7y@jpeg")
+  let test_image = ImageRef(title: "stars", location: "https://images.unsplash.com/photo-1733103373160-003dc53ccdba?q=80&w=1987&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D")
+  let test_image2 = ImageRef(title: "street", location: "https://images.unsplash.com/photo-1731978009363-21fa723e2cbe?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D")
   let local_image = ImageRef(title: "local", location: "./image.jpeg")
-  let images = [local_image]
+  let images = [test_image2, local_image, test_image]
 
   // welcome to lustre, it's react jsx but gleam
   html.div([], [
     ui.stack([attribute.id("container")],[
-      styles.theme(model.theme),
+      styles.theme(model.state.theme),
       styles.elements(),
       html.div([], [
         navbar(model),
         // Routing
         html.div([custom_styles, attribute.style([#("background", result.unwrap(dict.get(model.state.inputs, "colour"), ""))])], [
-          case model {
-            Model(Index, _, _) -> index(model)
-            Model(About, _, _) -> about(model)
+          case model.state.route {
+            Index -> index(model)
+            About -> about(model)
           },
         ]),
         html.div([
@@ -147,7 +191,7 @@ fn view(model: Model) -> Element(Msg) {
             Ok("red") -> attribute.style([#("background", "#882222")])
             _ -> attribute.none()
           }], 
-          [carousel(images)]
+          [carousel(model, "test", images)]
         ),
         ui.centre([], html.div([], [
           html.div([], [
@@ -156,7 +200,7 @@ fn view(model: Model) -> Element(Msg) {
           html.div([], [
             case dict.get(model.state.inputs, "image_input") {
               Ok("") -> element.none()
-              Ok(img) -> raw_image(img)
+              Ok(img) -> imageloader(to_imageref("input_image", img), 500, 600)
               _ -> element.none()
             },
           ]),
@@ -166,24 +210,6 @@ fn view(model: Model) -> Element(Msg) {
     ])
   ])
 }
-
-// fn canvas() -> Element(Msg) {
-//   ui.centre([], 
-//     html.canvas([
-//       attribute.id("canvas"), 
-//       attribute.style([
-//         #("border", "1px solid #d3d3d3"), 
-//         #("background-color", "#f1f1f1"), 
-//         #("width", "50ch")
-//       ]), 
-//       event.on_click(canvas_event(Circle))
-//     ]),
-//   )
-// }
-
-// fn canvas_event(action: CanvasAction) -> Msg {
-//   CanvasDraw(action)
-// }
 
 fn navbar(model: Model) -> Element(Msg) {
   html.div([classes.shadow_md()], [
@@ -215,29 +241,52 @@ type ImageRef {
   ImageRef(title: String, location: String)
 }
 
-fn carousel(images: List(ImageRef)) -> Element(Msg) {
-  // carousel location
-  html.div([], [
-    // carousel wrapper
-    ui.centre([], html.div([box.packed()], [
-      // image wrapper, (copy for now, then change to a db/file read loop maybe in a function)
-      case images {
-        [first, .._rest] -> {
-          html.div([], [
-            imageloader(first),
-          ])
-        }
-        _ -> element.none()
-      }
-    ])),
+fn to_imageref(title: String, location: String) -> ImageRef {
+  ImageRef(title, location)
+}
+
+fn carousel(model: Model, name: String, images: List(ImageRef)) -> Element(Msg) {
+  let carousel_wrapper = attribute.style([
+    #("position", "relative"),
+    #("width", "80%"),
+    #("max_width", "800px"),
+    #("max-height", "600px"),
+    #("margin", "0 auto"),
+    #("overflow", "hidden"),
+  ])
+  let carousel_element = attribute.style([
+    #("display", "flex"),
+    #("transition", "transform 0.5s ease-in-out"),
+  ])
+  let carousel_button = attribute.style([
+    #("position", "absolute"),
+    #("top", "50%"),
+    #("transform", "translateY(-50%)"),
+    #("background-color", "rgba(0, 0, 0, 0.5)"),
+    #("color", "white"),
+    #("border", "none"),
+    #("padding", "10px 20px"),
+    #("cursor", "pointer"),
+    #("z-index", "1"),
+  ])
+  // wrapper
+  html.div([carousel_wrapper], [
+    // carousel
+    html.div([carousel_element], 
+      // image elements
+      list.map(images, fn(image) {
+        html.img([attribute.src(image.location), attribute.alt(image.title), attribute.style([#("width", "100%"), #("flex-shrink", "0")])])
+      })
+    ),
+    // buttons
+    html.button([carousel_button, attribute.style([#("left", "10px")])], [icon.caret_left([])]),
+    html.button([carousel_button, attribute.style([#("right", "10px")])], [icon.caret_right([])]),
+    // TODO: dots
+    html.div([], []),
   ])
 }
 
-fn raw_image(source: String) -> Element(Msg) {
-  imageloader(ImageRef(title: "image", location: source))
-}
-
-fn imageloader(image: ImageRef) -> Element(Msg) {
+fn imageloader(image: ImageRef, width: Int, height: Int) -> Element(Msg) {
   html.div([attribute.style([#("display", "flex"), #("flex-grow", "4")])], [
     html.img([attribute.src(image.location), attribute.alt(image.title), attribute.width(500), attribute.height(600)]),
   ])
@@ -274,14 +323,15 @@ fn do_element_clones(amount: Int, element: Element(a), acc: List(Element(a))) ->
 fn index(model: Model) -> Element(Msg) {
   html.div([], [
     html.div([], [
-    ui.centre([], html.p([classes.text_md()], [element.text("INDEX")])),
-    ui.centre([classes.mt_md()], html.p([classes.font_mono(), classes.text_lg()], [element.text("lorem ipsum whatever man who cares")])),
-    ui.centre([], html.div([], [ 
-      ui.aside([],
-        ui.button([event.on_click(InputDecrement("icons"))], [element.text("-")]),
-        ui.button([event.on_click(InputIncrement("icons"))], [element.text("+")]),
-      ),
-    ])),
+      ui.centre([], html.p([classes.text_md()], [element.text("INDEX")])),
+      ui.centre([classes.mt_md()], html.p([classes.font_mono(), classes.text_lg()], [element.text("lorem ipsum whatever man who cares")])),
+      ui.centre([], html.div([], [ 
+        ui.aside([],
+          ui.button([event.on_click(IntMessage(IntDecrement("icons")))], [element.text("-")]),
+          ui.button([event.on_click(IntMessage(IntIncrement("icons")))], [element.text("+")]),
+        ),
+      ])),
+    ]),
     ui.centre(
       [classes.my_lg()], 
       html.div(
@@ -290,7 +340,6 @@ fn index(model: Model) -> Element(Msg) {
       )
     ),
     ui.centre([classes.my_lg()], html.p([classes.text_4xl(), classes.font_alt()], [element.text("What is your name my friend?")])),
-    ]),
     html.div([], [
     // State input using a dict
     ui.centre([], ui.aside([],
@@ -318,7 +367,7 @@ fn about(model: Model) -> Element(Msg) {
     ui.prose([prose.full()], [
       ui.centre([], html.h1([classes.pb_lg()], [element.text("TRAINING ARC")])),
     ]),
-    ui.centre([button.warning(), classes.pb_lg()], ui.button([event.on_click(InputIncrement("fizzbuzz"))], [html.p([classes.font_alt(), classes.text_5xl()], [element.text("MORE POWER")])])),
+    ui.centre([button.warning(), classes.pb_lg()], ui.button([event.on_click(IntMessage(IntIncrement("fizzbuzz")))], [html.p([classes.font_alt(), classes.text_5xl()], [element.text("MORE POWER")])])),
     html.div([classes.text_xl(), classes.font_mono(), attribute.style([#("display", "flex"), #("justify-content", "center")])],
       fizzbuzz(result.unwrap(dict.get(model.state.ints, "fizzbuzz"), 10)),
     ),
@@ -333,3 +382,22 @@ fn footer(model: Model) -> Element(Msg) {
     html.p([], [element.text("footer"),])
   ])
 }
+
+// fn canvas() -> Element(Msg) {
+//   ui.centre([], 
+//     html.canvas([
+//       attribute.id("canvas"), 
+//       attribute.style([
+//         #("border", "1px solid #d3d3d3"), 
+//         #("background-color", "#f1f1f1"), 
+//         #("width", "50ch")
+//       ]), 
+//       event.on_click(canvas_event(Circle))
+//     ]),
+//   )
+// }
+//
+// fn canvas_event(action: CanvasAction) -> Msg {
+//   CanvasDraw(action)
+// }
+

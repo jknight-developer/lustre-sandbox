@@ -2710,11 +2710,6 @@ function aside(attributes, side, main2) {
   return of(div, attributes, side, main2);
 }
 
-// build/dev/javascript/lustre_ui/lustre/ui/box.mjs
-function packed() {
-  return class$("packed");
-}
-
 // build/dev/javascript/lustre_ui/lustre/ui/button.mjs
 function button2(attributes, children2) {
   return button(
@@ -3335,6 +3330,18 @@ function icon(attrs, path2) {
     ])
   );
 }
+function caret_left(attrs) {
+  return icon(
+    attrs,
+    "M8.81809 4.18179C8.99383 4.35753 8.99383 4.64245 8.81809 4.81819L6.13629 7.49999L8.81809 10.1818C8.99383 10.3575 8.99383 10.6424 8.81809 10.8182C8.64236 10.9939 8.35743 10.9939 8.1817 10.8182L5.1817 7.81819C5.09731 7.73379 5.0499 7.61933 5.0499 7.49999C5.0499 7.38064 5.09731 7.26618 5.1817 7.18179L8.1817 4.18179C8.35743 4.00605 8.64236 4.00605 8.81809 4.18179Z"
+  );
+}
+function caret_right(attrs) {
+  return icon(
+    attrs,
+    "M6.18194 4.18185C6.35767 4.00611 6.6426 4.00611 6.81833 4.18185L9.81833 7.18185C9.90272 7.26624 9.95013 7.3807 9.95013 7.50005C9.95013 7.6194 9.90272 7.73386 9.81833 7.81825L6.81833 10.8182C6.6426 10.994 6.35767 10.994 6.18194 10.8182C6.0062 10.6425 6.0062 10.3576 6.18194 10.1819L8.86374 7.50005L6.18194 4.81825C6.0062 4.64251 6.0062 4.35759 6.18194 4.18185Z"
+  );
+}
 function sketch_logo(attrs) {
   return icon(
     attrs,
@@ -3533,18 +3540,19 @@ var Index = class extends CustomType {
 var About = class extends CustomType {
 };
 var State = class extends CustomType {
-  constructor(inputs, ints) {
+  constructor(route, theme2, inputs, ints, carousels) {
     super();
+    this.route = route;
+    this.theme = theme2;
     this.inputs = inputs;
     this.ints = ints;
+    this.carousels = carousels;
   }
 };
 var Model2 = class extends CustomType {
-  constructor(route, state, theme2) {
+  constructor(state) {
     super();
-    this.route = route;
     this.state = state;
-    this.theme = theme2;
   }
 };
 var OnRouteChange = class extends CustomType {
@@ -3555,12 +3563,6 @@ var OnRouteChange = class extends CustomType {
 };
 var StateReset = class extends CustomType {
 };
-var CanvasDraw = class extends CustomType {
-  constructor(x0) {
-    super();
-    this[0] = x0;
-  }
-};
 var InputUpdate = class extends CustomType {
   constructor(x0, x1) {
     super();
@@ -3568,13 +3570,19 @@ var InputUpdate = class extends CustomType {
     this[1] = x1;
   }
 };
-var InputIncrement = class extends CustomType {
+var IntMessage = class extends CustomType {
   constructor(x0) {
     super();
     this[0] = x0;
   }
 };
-var InputDecrement = class extends CustomType {
+var IntIncrement = class extends CustomType {
+  constructor(x0) {
+    super();
+    this[0] = x0;
+  }
+};
+var IntDecrement = class extends CustomType {
   constructor(x0) {
     super();
     this[0] = x0;
@@ -3587,10 +3595,27 @@ var ImageRef = class extends CustomType {
     this.location = location;
   }
 };
-function clock(msg) {
+function initial_state() {
+  let theme2 = new Theme(
+    purple(),
+    grey(),
+    red(),
+    yellow(),
+    green(),
+    blue()
+  );
+  return new State(
+    new Index(),
+    theme2,
+    new$(),
+    from_list(toList([["icons", 5], ["fizzbuzz", 10]])),
+    new$()
+  );
+}
+function set_interval(interval, msg) {
   return from(
     (dispatch) => {
-      setInterval(1e3, () => {
+      setInterval(interval, () => {
         return dispatch(msg);
       });
       return void 0;
@@ -3608,97 +3633,86 @@ function on_url_change(uri) {
   }
 }
 function init3(_) {
-  let theme2 = new Theme(
-    purple(),
-    grey(),
-    red(),
-    yellow(),
-    green(),
-    blue()
-  );
-  let ints_dict = from_list(toList([["icons", 5], ["fizzbuzz", 10]]));
   return [
-    new Model2(new Index(), new State(new$(), ints_dict), theme2),
+    new Model2(initial_state()),
     batch(
-      toList([init2(on_url_change), clock(new InputIncrement("fizzbuzz"))])
+      toList([
+        init2(on_url_change),
+        set_interval(1e3, new IntMessage(new IntIncrement("fizzbuzz")))
+      ])
     )
   ];
 }
+function int_message_handler(model, intmsg) {
+  if (intmsg instanceof IntIncrement) {
+    let name = intmsg[0];
+    return [
+      new Model2(
+        model.state.withFields({
+          ints: map_values(
+            model.state.ints,
+            (k, v) => {
+              if (k === name) {
+                let n = k;
+                return v + 1;
+              } else {
+                return v;
+              }
+            }
+          )
+        })
+      ),
+      none()
+    ];
+  } else {
+    let name = intmsg[0];
+    return [
+      new Model2(
+        model.state.withFields({
+          ints: map_values(
+            model.state.ints,
+            (k, v) => {
+              if (k === name && v > 0) {
+                let n = k;
+                let i = v;
+                return v - 1;
+              } else {
+                return v;
+              }
+            }
+          )
+        })
+      ),
+      none()
+    ];
+  }
+}
+function carousel_message_handler(model, carouselmsg) {
+  return [model, none()];
+}
 function update(model, msg) {
-  let ints_dict = from_list(toList([["icons", 5], ["fizzbuzz", 10]]));
-  {
-    let current_route = model.route;
-    let state = model.state;
-    let theme2 = model.theme;
-    if (msg instanceof OnRouteChange) {
-      let route = msg[0];
-      return [new Model2(route, state, theme2), none()];
-    } else if (msg instanceof StateReset) {
-      return [
-        new Model2(current_route, new State(new$(), ints_dict), theme2),
-        none()
-      ];
-    } else if (msg instanceof CanvasDraw) {
-      return [new Model2(current_route, state, theme2), none()];
-    } else if (msg instanceof InputUpdate) {
-      let name = msg[0];
-      let value3 = msg[1];
-      return [
-        new Model2(
-          current_route,
-          new State(insert(state.inputs, name, value3), state.ints),
-          theme2
-        ),
-        none()
-      ];
-    } else if (msg instanceof InputIncrement) {
-      let name = msg[0];
-      return [
-        new Model2(
-          current_route,
-          new State(
-            state.inputs,
-            map_values(
-              state.ints,
-              (k, v) => {
-                if (k === name) {
-                  let n = k;
-                  return v + 1;
-                } else {
-                  return v;
-                }
-              }
-            )
-          ),
-          theme2
-        ),
-        none()
-      ];
-    } else {
-      let name = msg[0];
-      return [
-        new Model2(
-          current_route,
-          new State(
-            state.inputs,
-            map_values(
-              state.ints,
-              (k, v) => {
-                if (k === name && v > 0) {
-                  let n = k;
-                  let i = v;
-                  return v - 1;
-                } else {
-                  return v;
-                }
-              }
-            )
-          ),
-          theme2
-        ),
-        none()
-      ];
-    }
+  if (msg instanceof OnRouteChange) {
+    let route = msg[0];
+    return [new Model2(model.state.withFields({ route })), none()];
+  } else if (msg instanceof StateReset) {
+    return [new Model2(initial_state()), none()];
+  } else if (msg instanceof InputUpdate) {
+    let name = msg[0];
+    let value3 = msg[1];
+    return [
+      new Model2(
+        model.state.withFields({
+          inputs: insert(model.state.inputs, name, value3)
+        })
+      ),
+      none()
+    ];
+  } else if (msg instanceof IntMessage) {
+    let intmsg = msg[0];
+    return int_message_handler(model, intmsg);
+  } else {
+    let carouselmsg = msg[0];
+    return carousel_message_handler(model, carouselmsg);
   }
 }
 function navbar(model) {
@@ -3778,7 +3792,69 @@ function navbar(model) {
     ])
   );
 }
-function imageloader(image) {
+function to_imageref(title, location) {
+  return new ImageRef(title, location);
+}
+function carousel(model, name, images) {
+  let carousel_wrapper = style(
+    toList([
+      ["position", "relative"],
+      ["width", "80%"],
+      ["max_width", "800px"],
+      ["max-height", "600px"],
+      ["margin", "0 auto"],
+      ["overflow", "hidden"]
+    ])
+  );
+  let carousel_element = style(
+    toList([["display", "flex"], ["transition", "transform 0.5s ease-in-out"]])
+  );
+  let carousel_button = style(
+    toList([
+      ["position", "absolute"],
+      ["top", "50%"],
+      ["transform", "translateY(-50%)"],
+      ["background-color", "rgba(0, 0, 0, 0.5)"],
+      ["color", "white"],
+      ["border", "none"],
+      ["padding", "10px 20px"],
+      ["cursor", "pointer"],
+      ["z-index", "1"]
+    ])
+  );
+  return div(
+    toList([carousel_wrapper]),
+    toList([
+      div(
+        toList([carousel_element]),
+        map(
+          images,
+          (image) => {
+            return img(
+              toList([
+                src(image.location),
+                alt(image.title),
+                style(
+                  toList([["width", "100%"], ["flex-shrink", "0"]])
+                )
+              ])
+            );
+          }
+        )
+      ),
+      button(
+        toList([carousel_button, style(toList([["left", "10px"]]))]),
+        toList([caret_left(toList([]))])
+      ),
+      button(
+        toList([carousel_button, style(toList([["right", "10px"]]))]),
+        toList([caret_right(toList([]))])
+      ),
+      div(toList([]), toList([]))
+    ])
+  );
+}
+function imageloader(image, width2, height2) {
   return div(
     toList([style(toList([["display", "flex"], ["flex-grow", "4"]]))]),
     toList([
@@ -3792,32 +3868,6 @@ function imageloader(image) {
       )
     ])
   );
-}
-function carousel(images) {
-  return div(
-    toList([]),
-    toList([
-      centre2(
-        toList([]),
-        div(
-          toList([packed()]),
-          toList([
-            (() => {
-              if (images.atLeastLength(1)) {
-                let first2 = images.head;
-                return div(toList([]), toList([imageloader(first2)]));
-              } else {
-                return none3();
-              }
-            })()
-          ])
-        )
-      )
-    ])
-  );
-}
-function raw_image(source) {
-  return imageloader(new ImageRef("image", source));
 }
 function do_fizzbuzz(loop$num, loop$acc, loop$textlist) {
   while (true) {
@@ -3923,7 +3973,7 @@ function do_fizzbuzz(loop$num, loop$acc, loop$textlist) {
       throw makeError(
         "panic",
         "chi",
-        259,
+        308,
         "do_fizzbuzz",
         "panic expression evaluated",
         {}
@@ -4036,45 +4086,47 @@ function index2(model) {
                 aside2(
                   toList([]),
                   button3(
-                    toList([on_click(new InputDecrement("icons"))]),
+                    toList([
+                      on_click(new IntMessage(new IntDecrement("icons")))
+                    ]),
                     toList([text("-")])
                   ),
                   button3(
-                    toList([on_click(new InputIncrement("icons"))]),
+                    toList([
+                      on_click(new IntMessage(new IntIncrement("icons")))
+                    ]),
                     toList([text("+")])
                   )
                 )
               ])
             )
-          ),
-          centre2(
-            toList([my_lg()]),
-            div(
-              toList([
-                style(
-                  toList([["width", "full"], ["height", "4rem"]])
-                )
-              ]),
-              element_clones(
-                unwrap(get(model.state.ints, "icons"), 5),
-                sketch_logo(
-                  toList([
-                    style(
-                      toList([["width", "4rem"], ["height", "4rem"]])
-                    )
-                  ])
-                )
-              )
-            )
-          ),
-          centre2(
-            toList([my_lg()]),
-            p(
-              toList([text_4xl(), font_alt()]),
-              toList([text("What is your name my friend?")])
-            )
           )
         ])
+      ),
+      centre2(
+        toList([my_lg()]),
+        div(
+          toList([
+            style(toList([["width", "full"], ["height", "4rem"]]))
+          ]),
+          element_clones(
+            unwrap(get(model.state.ints, "icons"), 5),
+            sketch_logo(
+              toList([
+                style(
+                  toList([["width", "4rem"], ["height", "4rem"]])
+                )
+              ])
+            )
+          )
+        )
+      ),
+      centre2(
+        toList([my_lg()]),
+        p(
+          toList([text_4xl(), font_alt()]),
+          toList([text("What is your name my friend?")])
+        )
       ),
       div(
         toList([]),
@@ -4136,7 +4188,7 @@ function about(model) {
       centre2(
         toList([warning(), pb_lg()]),
         button3(
-          toList([on_click(new InputIncrement("fizzbuzz"))]),
+          toList([on_click(new IntMessage(new IntIncrement("fizzbuzz")))]),
           toList([
             p(
               toList([font_alt(), text_5xl()]),
@@ -4185,19 +4237,23 @@ function view(model) {
   let custom_styles = style(
     toList([["width", "full"], ["margin", "0 auto"], ["padding", "2rem"]])
   );
-  let $ = new ImageRef(
-    "mario",
-    "https://cdn.bsky.app/img/feed_thumbnail/plain/did:plc:yvf7rm2mjqk4vy676fedjjra/bafkreieu7hcksyvq7k2cwyipm57pgzetdepf44a2hyrjbrrgeegqnknx7y@jpeg"
+  let test_image = new ImageRef(
+    "stars",
+    "https://images.unsplash.com/photo-1733103373160-003dc53ccdba?q=80&w=1987&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+  );
+  let test_image2 = new ImageRef(
+    "street",
+    "https://images.unsplash.com/photo-1731978009363-21fa723e2cbe?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
   );
   let local_image = new ImageRef("local", "./image.jpeg");
-  let images = toList([local_image]);
+  let images = toList([test_image2, local_image, test_image]);
   return div(
     toList([]),
     toList([
       stack2(
         toList([id("container")]),
         toList([
-          theme(model.theme),
+          theme(model.state.theme),
           elements2(),
           div(
             toList([]),
@@ -4220,7 +4276,8 @@ function view(model) {
                 ]),
                 toList([
                   (() => {
-                    if (model instanceof Model2 && model.route instanceof Index) {
+                    let $ = model.state.route;
+                    if ($ instanceof Index) {
                       return index2(model);
                     } else {
                       return about(model);
@@ -4231,8 +4288,8 @@ function view(model) {
               div(
                 toList([
                   (() => {
-                    let $1 = get(model.state.inputs, "colour");
-                    if ($1.isOk() && $1[0] === "red") {
+                    let $ = get(model.state.inputs, "colour");
+                    if ($.isOk() && $[0] === "red") {
                       return style(
                         toList([["background", "#882222"]])
                       );
@@ -4241,7 +4298,7 @@ function view(model) {
                     }
                   })()
                 ]),
-                toList([carousel(images)])
+                toList([carousel(model, "test", images)])
               ),
               centre2(
                 toList([]),
@@ -4267,12 +4324,16 @@ function view(model) {
                       toList([]),
                       toList([
                         (() => {
-                          let $1 = get(model.state.inputs, "image_input");
-                          if ($1.isOk() && $1[0] === "") {
+                          let $ = get(model.state.inputs, "image_input");
+                          if ($.isOk() && $[0] === "") {
                             return none3();
-                          } else if ($1.isOk()) {
-                            let img2 = $1[0];
-                            return raw_image(img2);
+                          } else if ($.isOk()) {
+                            let img2 = $[0];
+                            return imageloader(
+                              to_imageref("input_image", img2),
+                              500,
+                              600
+                            );
                           } else {
                             return none3();
                           }
@@ -4297,7 +4358,7 @@ function main() {
     throw makeError(
       "assignment_no_match",
       "chi",
-      29,
+      28,
       "main",
       "Assignment pattern did not match",
       { value: $ }
