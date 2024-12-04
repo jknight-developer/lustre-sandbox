@@ -23,38 +23,16 @@ import lustre/ui/styles
 import modem
 import plinth/javascript/global
 
+import lustre_sandbox/model.{type Model, Model}
+import lustre_sandbox/state.{type State, State, type CarouselState}
+import lustre_sandbox/route.{type Route, Index, About}
+import components/carousel.{type CarouselMsg}
+
 pub fn main() {
   let app = lustre.application(init, update, view)
   let assert Ok(_) = lustre.start(app, "#app", Nil)
 
   Nil
-}
-
-pub type Route {
-  Index
-  About
-}
-
-pub type FileName = String
-pub type FilePath = String
-
-pub type State {
-  State(
-    route: Route,
-    theme: Theme,
-    inputs: Dict(String, String),
-    ints: Dict(String, Int),
-    carousels: Dict(String, CarouselState),
-  )
-}
-
-pub type CarouselState
-
-
-pub type Model {
-  Model(
-    state: State,
-  )
 }
 
 pub fn initial_state() {
@@ -76,8 +54,6 @@ pub fn initial_state() {
 }
 
 fn init(_) -> #(Model, Effect(Msg)) {
-
-
   #(
     Model(
       initial_state(),
@@ -143,25 +119,13 @@ case intmsg {
   }
 }
 
-type CarouselMsg {
-  NextSlide(String)
-  PreviousSlide(String)
-  GotoSlide(String, Int)
-  StartAutoSlide(String, Int)
-  PauseAutoSlide(String, Int)
-}
-
-fn carousel_message_handler(model: Model, carouselmsg: CarouselMsg) {
-  #(model, effect.none())
-}
-
 fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
   case msg {
     OnRouteChange(route) -> #(Model(State(..model.state, route: route)), effect.none())
     StateReset -> #(Model(initial_state()), effect.none())
     InputUpdate(name, value) -> #(Model(State(..model.state, inputs: dict.insert(model.state.inputs, name, value))), effect.none())
     IntMessage(intmsg) -> int_message_handler(model, intmsg)
-    CarouselMessage(carouselmsg) -> carousel_message_handler(model, carouselmsg)
+    CarouselMessage(carouselmsg) -> carousel.message_handler(model, carouselmsg)
   }
 }
 

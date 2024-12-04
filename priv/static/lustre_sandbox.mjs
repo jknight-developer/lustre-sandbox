@@ -3534,11 +3534,13 @@ function setInterval(delay, callback) {
   return globalThis.setInterval(callback, delay);
 }
 
-// build/dev/javascript/chi/chi.mjs
+// build/dev/javascript/lustre_sandbox/lustre_sandbox/route.mjs
 var Index = class extends CustomType {
 };
 var About = class extends CustomType {
 };
+
+// build/dev/javascript/lustre_sandbox/lustre_sandbox/state.mjs
 var State = class extends CustomType {
   constructor(route, theme2, inputs, ints, carousels) {
     super();
@@ -3549,12 +3551,21 @@ var State = class extends CustomType {
     this.carousels = carousels;
   }
 };
+
+// build/dev/javascript/lustre_sandbox/lustre_sandbox/model.mjs
 var Model2 = class extends CustomType {
   constructor(state) {
     super();
     this.state = state;
   }
 };
+
+// build/dev/javascript/lustre_sandbox/components/carousel.mjs
+function message_handler(model, carouselmsg) {
+  return [model, none()];
+}
+
+// build/dev/javascript/lustre_sandbox/lustre_sandbox.mjs
 var OnRouteChange = class extends CustomType {
   constructor(x0) {
     super();
@@ -3685,34 +3696,6 @@ function int_message_handler(model, intmsg) {
       ),
       none()
     ];
-  }
-}
-function carousel_message_handler(model, carouselmsg) {
-  return [model, none()];
-}
-function update(model, msg) {
-  if (msg instanceof OnRouteChange) {
-    let route = msg[0];
-    return [new Model2(model.state.withFields({ route })), none()];
-  } else if (msg instanceof StateReset) {
-    return [new Model2(initial_state()), none()];
-  } else if (msg instanceof InputUpdate) {
-    let name = msg[0];
-    let value3 = msg[1];
-    return [
-      new Model2(
-        model.state.withFields({
-          inputs: insert(model.state.inputs, name, value3)
-        })
-      ),
-      none()
-    ];
-  } else if (msg instanceof IntMessage) {
-    let intmsg = msg[0];
-    return int_message_handler(model, intmsg);
-  } else {
-    let carouselmsg = msg[0];
-    return carousel_message_handler(model, carouselmsg);
   }
 }
 function navbar(model) {
@@ -3854,6 +3837,31 @@ function carousel(model, name, images) {
     ])
   );
 }
+function update(model, msg) {
+  if (msg instanceof OnRouteChange) {
+    let route = msg[0];
+    return [new Model2(model.state.withFields({ route })), none()];
+  } else if (msg instanceof StateReset) {
+    return [new Model2(initial_state()), none()];
+  } else if (msg instanceof InputUpdate) {
+    let name = msg[0];
+    let value3 = msg[1];
+    return [
+      new Model2(
+        model.state.withFields({
+          inputs: insert(model.state.inputs, name, value3)
+        })
+      ),
+      none()
+    ];
+  } else if (msg instanceof IntMessage) {
+    let intmsg = msg[0];
+    return int_message_handler(model, intmsg);
+  } else {
+    let carouselmsg = msg[0];
+    return message_handler(model, carouselmsg);
+  }
+}
 function imageloader(image, width2, height2) {
   return div(
     toList([style(toList([["display", "flex"], ["flex-grow", "4"]]))]),
@@ -3972,8 +3980,8 @@ function do_fizzbuzz(loop$num, loop$acc, loop$textlist) {
     } else {
       throw makeError(
         "panic",
-        "chi",
-        307,
+        "lustre_sandbox",
+        272,
         "do_fizzbuzz",
         "panic expression evaluated",
         {}
@@ -4357,8 +4365,8 @@ function main() {
   if (!$.isOk()) {
     throw makeError(
       "assignment_no_match",
-      "chi",
-      30,
+      "lustre_sandbox",
+      33,
       "main",
       "Assignment pattern did not match",
       { value: $ }
