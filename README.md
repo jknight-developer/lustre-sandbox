@@ -1,4 +1,7 @@
-# chi
+# lustre-sandbox
+
+Learning lustre by getting my hands dirty.
+Hopefully this will become a good reference for stateful lustre apps
 
 ## Development
 
