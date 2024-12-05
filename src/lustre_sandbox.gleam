@@ -1,3 +1,4 @@
+import gleam/io
 import gleam/dict
 import gleam/uri.{type Uri}
 import lustre
@@ -78,9 +79,10 @@ fn set_interval(interval: Int, msg: Msg) -> Effect(Msg) {
 }
 
 fn on_url_change(uri: Uri) -> Msg {
+  io.println(uri.path)
   case uri.path_segments(uri.path) {
-    ["index"] -> msg.OnRouteChange(msg.Index)
-    ["about"] -> msg.OnRouteChange(msg.About)
+    ["lustre-sandbox", "index"] -> msg.OnRouteChange(msg.Index)
+    ["lustre-sandbox", "about"] -> msg.OnRouteChange(msg.About)
     _ -> msg.OnRouteChange(msg.Index)
   }
 }

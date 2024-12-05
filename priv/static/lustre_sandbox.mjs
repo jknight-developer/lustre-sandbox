@@ -1445,6 +1445,9 @@ var unicode_whitespaces = [
 ].join("");
 var left_trim_regex = new RegExp(`^([${unicode_whitespaces}]*)`, "g");
 var right_trim_regex = new RegExp(`([${unicode_whitespaces}]*)$`, "g");
+function console_log(term) {
+  console.log(term);
+}
 function round(float3) {
   return Math.round(float3);
 }
@@ -1648,6 +1651,11 @@ function do_map_values(f, dict) {
 }
 function map_values(dict, fun) {
   return do_map_values(fun, dict);
+}
+
+// build/dev/javascript/gleam_stdlib/gleam/io.mjs
+function println(string3) {
+  return console_log(string3);
 }
 
 // build/dev/javascript/gleam_stdlib/gleam/uri.mjs
@@ -4414,10 +4422,11 @@ function set_interval(interval, msg) {
   );
 }
 function on_url_change(uri) {
+  println(uri.path);
   let $ = path_segments(uri.path);
-  if ($.hasLength(1) && $.head === "index") {
+  if ($.hasLength(2) && $.head === "lustre-sandbox" && $.tail.head === "index") {
     return new OnRouteChange(new Index());
-  } else if ($.hasLength(1) && $.head === "about") {
+  } else if ($.hasLength(2) && $.head === "lustre-sandbox" && $.tail.head === "about") {
     return new OnRouteChange(new About());
   } else {
     return new OnRouteChange(new Index());
@@ -4487,7 +4496,7 @@ function main() {
     throw makeError(
       "assignment_no_match",
       "lustre_sandbox",
-      24,
+      25,
       "main",
       "Assignment pattern did not match",
       { value: $ }
