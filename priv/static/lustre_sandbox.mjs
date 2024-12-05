@@ -4379,7 +4379,7 @@ function main() {
     throw makeError(
       "assignment_no_match",
       "lustre_sandbox",
-      34,
+      32,
       "main",
       "Assignment pattern did not match",
       { value: $ }

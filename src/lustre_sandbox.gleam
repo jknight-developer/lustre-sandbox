@@ -1,5 +1,4 @@
 import gleam/dict
-import gleam/int
 import gleam/list
 import gleam/result
 import gleam/uri.{type Uri}
@@ -11,7 +10,6 @@ import lustre/element/html
 import lustre/event
 import lustre/ui.{type Theme, Theme}
 import lustre/ui/button
-import lustre/ui/centre
 import lustre/ui/classes
 import lustre/ui/colour
 import lustre/ui/icon
@@ -82,9 +80,6 @@ fn on_url_change(uri: Uri) -> Msg {
     _ -> msg.OnRouteChange(msg.Index)
   }
 }
-
-// type CanvasAction {
-// }
 
 fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
   case msg {
@@ -239,22 +234,4 @@ fn footer(model: Model) -> Element(Msg) {
     html.p([], [element.text("footer"),])
   ])
 }
-
-// fn canvas() -> Element(Msg) {
-//   ui.centre([], 
-//     html.canvas([
-//       attribute.id("canvas"), 
-//       attribute.style([
-//         #("border", "1px solid #d3d3d3"), 
-//         #("background-color", "#f1f1f1"), 
-//         #("width", "50ch")
-//       ]), 
-//       event.on_click(canvas_event(Circle))
-//     ]),
-//   )
-// }
-//
-// fn canvas_event(action: CanvasAction) -> Msg {
-//   CanvasDraw(action)
-// }
 
