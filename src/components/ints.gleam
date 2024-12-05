@@ -1,8 +1,7 @@
 import gleam/dict
 import lustre/effect.{type Effect}
-import lustre_sandbox/state.{type State, State}
-import lustre_sandbox/model.{type Model, Model}
-import lustre_sandbox/msg.{type Msg, type IntMsg}
+import lustre_sandbox/lib/types.{type Model, Model, type State, State}
+import lustre_sandbox/lib/msg.{type Msg, type IntMsg}
 
 pub fn message_handler(model: Model, intmsg: IntMsg) -> #(Model, Effect(Msg)) {
   case intmsg {

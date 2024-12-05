@@ -3534,7 +3534,7 @@ function setInterval(delay, callback) {
   return globalThis.setInterval(callback, delay);
 }
 
-// build/dev/javascript/lustre_sandbox/lustre_sandbox/msg.mjs
+// build/dev/javascript/lustre_sandbox/lustre_sandbox/lib/msg.mjs
 var OnRouteChange = class extends CustomType {
   constructor(x0) {
     super();
@@ -3573,50 +3573,29 @@ var IntDecrement = class extends CustomType {
   }
 };
 
-// build/dev/javascript/lustre_sandbox/lustre_sandbox/lib.mjs
-var ImageRef = class extends CustomType {
-  constructor(title, location) {
+// build/dev/javascript/lustre_sandbox/lustre_sandbox/lib/types.mjs
+var Model2 = class extends CustomType {
+  constructor(state) {
     super();
-    this.title = title;
-    this.location = location;
+    this.state = state;
   }
 };
-function to_imageref(title, location) {
-  return new ImageRef(title, location);
-}
-function imageloader(image, width2, height2) {
-  return div(
-    toList([style(toList([["display", "flex"], ["flex-grow", "4"]]))]),
-    toList([
-      img(
-        toList([
-          src(image.location),
-          alt(image.title),
-          width(width2),
-          height(height2)
-        ])
-      )
-    ])
-  );
-}
-
-// build/dev/javascript/lustre_sandbox/lustre_sandbox/state.mjs
 var State = class extends CustomType {
-  constructor(route, theme2, inputs, ints, carousels) {
+  constructor(route, theme2, images, inputs, ints, carousels) {
     super();
     this.route = route;
     this.theme = theme2;
+    this.images = images;
     this.inputs = inputs;
     this.ints = ints;
     this.carousels = carousels;
   }
 };
-
-// build/dev/javascript/lustre_sandbox/lustre_sandbox/model.mjs
-var Model2 = class extends CustomType {
-  constructor(state) {
+var ImageRef = class extends CustomType {
+  constructor(title, location) {
     super();
-    this.state = state;
+    this.title = title;
+    this.location = location;
   }
 };
 
@@ -3945,82 +3924,24 @@ function navbar(model) {
   );
 }
 
-// build/dev/javascript/lustre_sandbox/lustre_sandbox.mjs
-function initial_state() {
-  let theme2 = new Theme(
-    purple(),
-    grey(),
-    red(),
-    yellow(),
-    green(),
-    blue()
+// build/dev/javascript/lustre_sandbox/lustre_sandbox/lib.mjs
+function to_imageref(title, location) {
+  return new ImageRef(title, location);
+}
+function imageloader(image, width2, height2) {
+  return div(
+    toList([style(toList([["display", "flex"], ["flex-grow", "4"]]))]),
+    toList([
+      img(
+        toList([
+          src(image.location),
+          alt(image.title),
+          width(width2),
+          height(height2)
+        ])
+      )
+    ])
   );
-  return new State(
-    new Index(),
-    theme2,
-    new$(),
-    from_list(toList([["icons", 5], ["fizzbuzz", 10]])),
-    new$()
-  );
-}
-function set_interval(interval, msg) {
-  return from(
-    (dispatch) => {
-      setInterval(interval, () => {
-        return dispatch(msg);
-      });
-      return void 0;
-    }
-  );
-}
-function on_url_change(uri) {
-  let $ = path_segments(uri.path);
-  if ($.hasLength(1) && $.head === "index") {
-    return new OnRouteChange(new Index());
-  } else if ($.hasLength(1) && $.head === "about") {
-    return new OnRouteChange(new About());
-  } else {
-    return new OnRouteChange(new Index());
-  }
-}
-function init3(_) {
-  return [
-    new Model2(initial_state()),
-    batch(
-      toList([
-        init2(on_url_change),
-        set_interval(1e3, new IntMessage(new IntIncrement("fizzbuzz")))
-      ])
-    )
-  ];
-}
-function update(model, msg) {
-  if (msg instanceof OnRouteChange) {
-    let route = msg[0];
-    return [new Model2(model.state.withFields({ route })), none()];
-  } else if (msg instanceof StateReset) {
-    return [
-      new Model2(initial_state().withFields({ route: model.state.route })),
-      none()
-    ];
-  } else if (msg instanceof InputUpdate) {
-    let name = msg[0];
-    let value3 = msg[1];
-    return [
-      new Model2(
-        model.state.withFields({
-          inputs: insert(model.state.inputs, name, value3)
-        })
-      ),
-      none()
-    ];
-  } else if (msg instanceof IntMessage) {
-    let intmsg = msg[0];
-    return message_handler2(model, intmsg);
-  } else {
-    let carouselmsg = msg[0];
-    return message_handler(model, carouselmsg);
-  }
 }
 function do_element_clones(loop$amount, loop$element, loop$acc) {
   while (true) {
@@ -4078,6 +3999,57 @@ function input_box(model, name, placeholder2, attrs) {
     );
   }
 }
+
+// build/dev/javascript/lustre_sandbox/pages/about.mjs
+function about(model) {
+  return div(
+    toList([style(toList([["min-height", "80rem"]]))]),
+    toList([
+      prose2(
+        toList([full()]),
+        toList([
+          centre2(
+            toList([]),
+            h1(
+              toList([pb_lg()]),
+              toList([text("TRAINING ARC")])
+            )
+          )
+        ])
+      ),
+      centre2(
+        toList([warning(), pb_lg()]),
+        button3(
+          toList([
+            on_click(
+              new IntMessage(new IntIncrement("fizzbuzz"))
+            )
+          ]),
+          toList([
+            p(
+              toList([font_alt(), text_5xl()]),
+              toList([text("MORE POWER")])
+            )
+          ])
+        )
+      ),
+      div(
+        toList([
+          text_xl(),
+          font_mono(),
+          style(
+            toList([["display", "flex"], ["justify-content", "center"]])
+          )
+        ]),
+        fizzbuzz(
+          unwrap(get(model.state.ints, "fizzbuzz"), 10)
+        )
+      )
+    ])
+  );
+}
+
+// build/dev/javascript/lustre_sandbox/pages/index.mjs
 function index2(model) {
   return div(
     toList([]),
@@ -4188,50 +4160,97 @@ function index2(model) {
     ])
   );
 }
-function about(model) {
-  return div(
-    toList([style(toList([["min-height", "80rem"]]))]),
-    toList([
-      prose2(
-        toList([full()]),
-        toList([
-          centre2(
-            toList([]),
-            h1(
-              toList([pb_lg()]),
-              toList([text("TRAINING ARC")])
-            )
-          )
-        ])
-      ),
-      centre2(
-        toList([warning(), pb_lg()]),
-        button3(
-          toList([
-            on_click(new IntMessage(new IntIncrement("fizzbuzz")))
-          ]),
-          toList([
-            p(
-              toList([font_alt(), text_5xl()]),
-              toList([text("MORE POWER")])
-            )
-          ])
-        )
-      ),
-      div(
-        toList([
-          text_xl(),
-          font_mono(),
-          style(
-            toList([["display", "flex"], ["justify-content", "center"]])
-          )
-        ]),
-        fizzbuzz(
-          unwrap(get(model.state.ints, "fizzbuzz"), 10)
-        )
-      )
-    ])
+
+// build/dev/javascript/lustre_sandbox/lustre_sandbox.mjs
+function initial_state() {
+  let test_image = new ImageRef(
+    "stars",
+    "https://images.unsplash.com/photo-1733103373160-003dc53ccdba?q=80&w=1987&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
   );
+  let test_image2 = new ImageRef(
+    "street",
+    "https://images.unsplash.com/photo-1731978009363-21fa723e2cbe?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+  );
+  let local_image = new ImageRef("local", "./image.jpeg");
+  let images = toList([test_image2, local_image, test_image]);
+  let theme2 = new Theme(
+    purple(),
+    grey(),
+    red(),
+    yellow(),
+    green(),
+    blue()
+  );
+  return new State(
+    new Index(),
+    theme2,
+    images,
+    new$(),
+    from_list(toList([["icons", 5], ["fizzbuzz", 10]])),
+    new$()
+  );
+}
+function set_interval(interval, msg) {
+  return from(
+    (dispatch) => {
+      setInterval(interval, () => {
+        return dispatch(msg);
+      });
+      return void 0;
+    }
+  );
+}
+function on_url_change(uri) {
+  let $ = path_segments(uri.path);
+  if ($.hasLength(1) && $.head === "index") {
+    return new OnRouteChange(new Index());
+  } else if ($.hasLength(1) && $.head === "about") {
+    return new OnRouteChange(new About());
+  } else {
+    return new OnRouteChange(new Index());
+  }
+}
+function init3(_) {
+  return [
+    new Model2(initial_state()),
+    batch(
+      toList([
+        init2(on_url_change),
+        set_interval(
+          1e3,
+          new IntMessage(new IntIncrement("fizzbuzz"))
+        )
+      ])
+    )
+  ];
+}
+function update(model, msg) {
+  if (msg instanceof OnRouteChange) {
+    let route = msg[0];
+    return [new Model2(model.state.withFields({ route })), none()];
+  } else if (msg instanceof StateReset) {
+    return [
+      new Model2(initial_state().withFields({ route: model.state.route })),
+      none()
+    ];
+  } else if (msg instanceof InputUpdate) {
+    let name = msg[0];
+    let value3 = msg[1];
+    return [
+      new Model2(
+        model.state.withFields({
+          inputs: insert(model.state.inputs, name, value3)
+        })
+      ),
+      none()
+    ];
+  } else if (msg instanceof IntMessage) {
+    let intmsg = msg[0];
+    return message_handler2(model, intmsg);
+  } else {
+    let carouselmsg = msg[0];
+    return message_handler(model, carouselmsg);
+  }
 }
 function footer(model) {
   return div(
@@ -4260,16 +4279,6 @@ function view(model) {
   let custom_styles = style(
     toList([["width", "full"], ["margin", "0 auto"], ["padding", "2rem"]])
   );
-  let test_image = new ImageRef(
-    "stars",
-    "https://images.unsplash.com/photo-1733103373160-003dc53ccdba?q=80&w=1987&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-  );
-  let test_image2 = new ImageRef(
-    "street",
-    "https://images.unsplash.com/photo-1731978009363-21fa723e2cbe?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-  );
-  let local_image = new ImageRef("local", "./image.jpeg");
-  let images = toList([test_image2, local_image, test_image]);
   return div(
     toList([]),
     toList([
@@ -4321,7 +4330,7 @@ function view(model) {
                     }
                   })()
                 ]),
-                toList([carousel(model, "test", images)])
+                toList([carousel(model, "test", model.state.images)])
               ),
               centre2(
                 toList([]),
@@ -4381,7 +4390,7 @@ function main() {
     throw makeError(
       "assignment_no_match",
       "lustre_sandbox",
-      33,
+      35,
       "main",
       "Assignment pattern did not match",
       { value: $ }

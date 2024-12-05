@@ -6,8 +6,8 @@ import lustre/event
 import lustre/ui
 import lustre/ui/button
 import lustre/ui/classes
-import lustre_sandbox/model.{type Model}
-import lustre_sandbox/msg.{type Msg}
+import lustre_sandbox/lib/types.{type Model}
+import lustre_sandbox/lib/msg.{type Msg}
 
 pub fn navbar(model: Model) -> Element(Msg) {
   html.div([classes.shadow_md()], [

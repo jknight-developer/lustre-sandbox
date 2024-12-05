@@ -6,7 +6,7 @@ import lustre/element/html
 import lustre/ui
 import lustre/ui/centre
 import lustre/ui/classes
-import lustre_sandbox/msg.{type Msg}
+import lustre_sandbox/lib/msg.{type Msg}
 
 pub fn fizzbuzz(num: Int) -> List(Element(Msg)) {
   [ui.centre([centre.inline()], html.div([attribute.style([#("display", "flex"), #("align-items", "center"), #("flex-wrap", "wrap"), #("gap", "10px")])], do_fizzbuzz(num, 1, [])))]

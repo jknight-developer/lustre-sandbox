@@ -5,9 +5,8 @@ import lustre/element.{type Element}
 import lustre/element/html
 import lustre/event
 import lustre/ui/icon
-import lustre_sandbox/model.{type Model}
-import lustre_sandbox/lib.{type ImageRef}
-import lustre_sandbox/msg.{type Msg, type CarouselMsg}
+import lustre_sandbox/lib/types.{type Model, type ImageRef}
+import lustre_sandbox/lib/msg.{type Msg, type CarouselMsg}
 
 pub fn message_handler(model: Model, carouselmsg: CarouselMsg) {
   case carouselmsg {
