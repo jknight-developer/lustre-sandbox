@@ -116,7 +116,7 @@ fn view(model: Model) -> Element(Msg) {
     ui.stack([attribute.id("container")], [
       styles.theme(model.state.theme),
       styles.elements(),
-      app.app(model)
+      app.app(model),
     ]),
   ])
 }

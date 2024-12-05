@@ -1,20 +1,19 @@
+import components/carousel
+import components/footer
+import components/navbar
 import gleam/dict
 import gleam/result
 import lustre/attribute
 import lustre/element.{type Element}
 import lustre/element/html
 import lustre/ui
-import lustre/ui/input
 import lustre/ui/classes
+import lustre/ui/input
 import lustre_sandbox/lib
-import lustre_sandbox/lib/types.{type Model}
 import lustre_sandbox/lib/msg.{type Msg}
-import components/carousel
-import components/footer
-import components/navbar
-import pages/index
+import lustre_sandbox/lib/types.{type Model}
 import pages/about
-
+import pages/index
 
 pub fn app(model: Model) -> Element(Msg) {
   html.div([], [

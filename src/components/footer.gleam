@@ -2,8 +2,8 @@ import gleam/dict
 import lustre/attribute
 import lustre/element.{type Element}
 import lustre/element/html
-import lustre_sandbox/lib/types.{type Model}
 import lustre_sandbox/lib/msg.{type Msg}
+import lustre_sandbox/lib/types.{type Model}
 
 pub fn footer(model: Model) -> Element(Msg) {
   html.div(
