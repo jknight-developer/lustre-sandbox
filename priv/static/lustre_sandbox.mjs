@@ -3866,83 +3866,7 @@ function message_handler2(model, intmsg) {
   }
 }
 
-// build/dev/javascript/lustre_sandbox/lustre_sandbox.mjs
-function initial_state() {
-  let theme2 = new Theme(
-    purple(),
-    grey(),
-    red(),
-    yellow(),
-    green(),
-    blue()
-  );
-  return new State(
-    new Index(),
-    theme2,
-    new$(),
-    from_list(toList([["icons", 5], ["fizzbuzz", 10]])),
-    new$()
-  );
-}
-function set_interval(interval, msg) {
-  return from(
-    (dispatch) => {
-      setInterval(interval, () => {
-        return dispatch(msg);
-      });
-      return void 0;
-    }
-  );
-}
-function on_url_change(uri) {
-  let $ = path_segments(uri.path);
-  if ($.hasLength(1) && $.head === "index") {
-    return new OnRouteChange(new Index());
-  } else if ($.hasLength(1) && $.head === "about") {
-    return new OnRouteChange(new About());
-  } else {
-    return new OnRouteChange(new Index());
-  }
-}
-function init3(_) {
-  return [
-    new Model2(initial_state()),
-    batch(
-      toList([
-        init2(on_url_change),
-        set_interval(1e3, new IntMessage(new IntIncrement("fizzbuzz")))
-      ])
-    )
-  ];
-}
-function update(model, msg) {
-  if (msg instanceof OnRouteChange) {
-    let route = msg[0];
-    return [new Model2(model.state.withFields({ route })), none()];
-  } else if (msg instanceof StateReset) {
-    return [
-      new Model2(initial_state().withFields({ route: model.state.route })),
-      none()
-    ];
-  } else if (msg instanceof InputUpdate) {
-    let name = msg[0];
-    let value3 = msg[1];
-    return [
-      new Model2(
-        model.state.withFields({
-          inputs: insert(model.state.inputs, name, value3)
-        })
-      ),
-      none()
-    ];
-  } else if (msg instanceof IntMessage) {
-    let intmsg = msg[0];
-    return message_handler2(model, intmsg);
-  } else {
-    let carouselmsg = msg[0];
-    return message_handler(model, carouselmsg);
-  }
-}
+// build/dev/javascript/lustre_sandbox/components/navbar.mjs
 function navbar(model) {
   return div(
     toList([shadow_md()]),
@@ -4019,6 +3943,84 @@ function navbar(model) {
       hr(toList([style(toList([["opacity", "0"]]))]))
     ])
   );
+}
+
+// build/dev/javascript/lustre_sandbox/lustre_sandbox.mjs
+function initial_state() {
+  let theme2 = new Theme(
+    purple(),
+    grey(),
+    red(),
+    yellow(),
+    green(),
+    blue()
+  );
+  return new State(
+    new Index(),
+    theme2,
+    new$(),
+    from_list(toList([["icons", 5], ["fizzbuzz", 10]])),
+    new$()
+  );
+}
+function set_interval(interval, msg) {
+  return from(
+    (dispatch) => {
+      setInterval(interval, () => {
+        return dispatch(msg);
+      });
+      return void 0;
+    }
+  );
+}
+function on_url_change(uri) {
+  let $ = path_segments(uri.path);
+  if ($.hasLength(1) && $.head === "index") {
+    return new OnRouteChange(new Index());
+  } else if ($.hasLength(1) && $.head === "about") {
+    return new OnRouteChange(new About());
+  } else {
+    return new OnRouteChange(new Index());
+  }
+}
+function init3(_) {
+  return [
+    new Model2(initial_state()),
+    batch(
+      toList([
+        init2(on_url_change),
+        set_interval(1e3, new IntMessage(new IntIncrement("fizzbuzz")))
+      ])
+    )
+  ];
+}
+function update(model, msg) {
+  if (msg instanceof OnRouteChange) {
+    let route = msg[0];
+    return [new Model2(model.state.withFields({ route })), none()];
+  } else if (msg instanceof StateReset) {
+    return [
+      new Model2(initial_state().withFields({ route: model.state.route })),
+      none()
+    ];
+  } else if (msg instanceof InputUpdate) {
+    let name = msg[0];
+    let value3 = msg[1];
+    return [
+      new Model2(
+        model.state.withFields({
+          inputs: insert(model.state.inputs, name, value3)
+        })
+      ),
+      none()
+    ];
+  } else if (msg instanceof IntMessage) {
+    let intmsg = msg[0];
+    return message_handler2(model, intmsg);
+  } else {
+    let carouselmsg = msg[0];
+    return message_handler(model, carouselmsg);
+  }
 }
 function do_element_clones(loop$amount, loop$element, loop$acc) {
   while (true) {
@@ -4379,7 +4381,7 @@ function main() {
     throw makeError(
       "assignment_no_match",
       "lustre_sandbox",
-      32,
+      33,
       "main",
       "Assignment pattern did not match",
       { value: $ }

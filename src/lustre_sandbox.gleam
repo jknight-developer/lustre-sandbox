@@ -26,6 +26,7 @@ import lustre_sandbox/lib.{type ImageRef, ImageRef}
 import components/carousel
 import components/ints
 import components/fizzbuzz
+import components/navbar
 
 pub fn main() {
   let app = lustre.application(init, update, view)
@@ -104,7 +105,7 @@ fn view(model: Model) -> Element(Msg) {
       styles.theme(model.state.theme),
       styles.elements(),
       html.div([], [
-        navbar(model),
+        navbar.navbar(model),
         // Routing
         html.div([custom_styles, attribute.style([#("background", result.unwrap(dict.get(model.state.inputs, "colour"), ""))])], [
           case model.state.route {
@@ -134,32 +135,6 @@ fn view(model: Model) -> Element(Msg) {
         footer(model),
       ])
     ])
-  ])
-}
-
-fn navbar(model: Model) -> Element(Msg) {
-  html.div([classes.shadow_md()], [
-    ui.centre([], html.nav([], [
-      html.a([attribute.href("/")], [
-        ui.button([event.on_click(msg.InputUpdate("colour", ""))], [element.text("Index")]),
-      ]),
-      html.a([],[element.text(" | ")]),
-      html.a([], [
-        case dict.get(model.state.inputs, "colour") {
-          Ok("red") -> ui.button([button.solid(), button.error(), event.on_click(msg.InputUpdate("colour", ""))], [element.text("RED MODE: ON ")])
-          _ -> ui.button([button.solid(), button.error(), event.on_click(msg.InputUpdate("colour", "red"))], [element.text("RED MODE: OFF")])
-        }
-      ]),
-      html.a([],[element.text(" | ")]),
-      html.a([], [
-        ui.button([button.solid(), button.info(), event.on_click(msg.StateReset)], [element.text("RESET")])
-      ]),
-      html.a([],[element.text(" | ")]),
-      html.a([attribute.href("/about")], [
-        ui.button([button.info(), button.outline(), button.warning()], [element.text("About")]),
-      ]),
-    ])),
-    html.hr([attribute.style([#("opacity", "0")])]),
   ])
 }
 
