@@ -3,9 +3,7 @@ import lustre/ui.{type Theme}
 import lustre_sandbox/lib/msg.{type Route}
 
 pub type Model {
-  Model(
-    state: State,
-  )
+  Model(state: State)
 }
 
 pub type State {

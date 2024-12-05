@@ -23,4 +23,3 @@ pub type IntMsg {
   IntIncrement(String)
   IntDecrement(String)
 }
-

@@ -3770,7 +3770,7 @@ function do_fizzbuzz(loop$num, loop$acc, loop$textlist) {
       throw makeError(
         "panic",
         "components/fizzbuzz",
-        24,
+        106,
         "do_fizzbuzz",
         "panic expression evaluated",
         {}
@@ -4390,7 +4390,7 @@ function main() {
     throw makeError(
       "assignment_no_match",
       "lustre_sandbox",
-      35,
+      37,
       "main",
       "Assignment pattern did not match",
       { value: $ }

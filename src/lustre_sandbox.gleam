@@ -19,16 +19,18 @@ import lustre/ui/styles
 import modem
 import plinth/javascript/global
 
-import lustre_sandbox/lib
-import lustre_sandbox/lib/types.{type Model, Model, type State, State, type ImageRef, ImageRef}
-import lustre_sandbox/lib/msg.{type Msg}
 import components/carousel
-import components/ints
 import components/fizzbuzz
+import components/ints
 import components/navbar
+import lustre_sandbox/lib
+import lustre_sandbox/lib/msg.{type Msg}
+import lustre_sandbox/lib/types.{
+  type ImageRef, type Model, type State, ImageRef, Model, State,
+}
+import pages/about
 import pages/app
 import pages/index
-import pages/about
 
 pub fn main() {
   let app = lustre.application(init, update, view)
@@ -38,19 +40,28 @@ pub fn main() {
 }
 
 pub fn initial_state() {
-  let test_image = ImageRef(title: "stars", location: "https://images.unsplash.com/photo-1733103373160-003dc53ccdba?q=80&w=1987&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D")
-  let test_image2 = ImageRef(title: "street", location: "https://images.unsplash.com/photo-1731978009363-21fa723e2cbe?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D")
+  let test_image =
+    ImageRef(
+      title: "stars",
+      location: "https://images.unsplash.com/photo-1733103373160-003dc53ccdba?q=80&w=1987&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    )
+  let test_image2 =
+    ImageRef(
+      title: "street",
+      location: "https://images.unsplash.com/photo-1731978009363-21fa723e2cbe?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    )
   let local_image = ImageRef(title: "local", location: "./image.jpeg")
   let images = [test_image2, local_image, test_image]
 
-  let theme = Theme(
-    primary: colour.purple(),
-    greyscale: colour.grey(),
-    error: colour.red(),
-    warning: colour.yellow(),
-    success: colour.green(),
-    info: colour.blue(),
-  )
+  let theme =
+    Theme(
+      primary: colour.purple(),
+      greyscale: colour.grey(),
+      error: colour.red(),
+      warning: colour.yellow(),
+      success: colour.green(),
+      info: colour.blue(),
+    )
 
   State(
     route: msg.Index,
@@ -64,21 +75,17 @@ pub fn initial_state() {
 
 fn init(_) -> #(Model, Effect(Msg)) {
   #(
-    Model(
-      initial_state(),
-    ),
+    Model(initial_state()),
     effect.batch([
       modem.init(on_url_change),
-      set_interval(1000, msg.IntMessage(msg.IntIncrement("fizzbuzz")))
-    ])
+      set_interval(1000, msg.IntMessage(msg.IntIncrement("fizzbuzz"))),
+    ]),
   )
 }
 
 fn set_interval(interval: Int, msg: Msg) -> Effect(Msg) {
   effect.from(fn(dispatch) {
-    global.set_interval(interval, fn() {
-      dispatch(msg)
-    })
+    global.set_interval(interval, fn() { dispatch(msg) })
     Nil
   })
 }
@@ -93,62 +100,108 @@ fn on_url_change(uri: Uri) -> Msg {
 
 fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
   case msg {
-    msg.OnRouteChange(route) -> #(Model(State(..model.state, route: route)), effect.none())
-    msg.StateReset -> #(Model(State(..initial_state(), route: model.state.route)), effect.none())
-    msg.InputUpdate(name, value) -> #(Model(State(..model.state, inputs: dict.insert(model.state.inputs, name, value))), effect.none())
+    msg.OnRouteChange(route) -> #(
+      Model(State(..model.state, route: route)),
+      effect.none(),
+    )
+    msg.StateReset -> #(
+      Model(State(..initial_state(), route: model.state.route)),
+      effect.none(),
+    )
+    msg.InputUpdate(name, value) -> #(
+      Model(
+        State(
+          ..model.state,
+          inputs: dict.insert(model.state.inputs, name, value),
+        ),
+      ),
+      effect.none(),
+    )
     msg.IntMessage(intmsg) -> ints.message_handler(model, intmsg)
-    msg.CarouselMessage(carouselmsg) -> carousel.message_handler(model, carouselmsg)
+    msg.CarouselMessage(carouselmsg) ->
+      carousel.message_handler(model, carouselmsg)
   }
 }
 
 fn view(model: Model) -> Element(Msg) {
-  let custom_styles = attribute.style([#("width", "full"), #("margin", "0 auto"), #("padding", "2rem")])
+  let custom_styles =
+    attribute.style([
+      #("width", "full"),
+      #("margin", "0 auto"),
+      #("padding", "2rem"),
+    ])
 
   // welcome to lustre, it's react jsx but gleam
   html.div([], [
-    ui.stack([attribute.id("container")],[
+    ui.stack([attribute.id("container")], [
       styles.theme(model.state.theme),
       styles.elements(),
       html.div([], [
         navbar.navbar(model),
         // Routing
-        html.div([custom_styles, attribute.style([#("background", result.unwrap(dict.get(model.state.inputs, "colour"), ""))])], [
-          case model.state.route {
-            msg.Index -> index.index(model)
-            msg.About -> about.about(model)
-          },
-        ]),
-        html.div([
-          case dict.get(model.state.inputs, "colour") {
-            Ok("red") -> attribute.style([#("background", "#882222")])
-            _ -> attribute.none()
-          }], 
-          [carousel.carousel(model, "test", model.state.images)]
-        ),
-        ui.centre([], html.div([], [
-          html.div([], [
-            lib.input_box(model, "image_input", "[image_input]", [classes.text_2xl(), attribute.style([#("width", "full")]), input.primary()]),
-          ]),
-          html.div([], [
-            case dict.get(model.state.inputs, "image_input") {
-              Ok("") -> element.none()
-              Ok(img) -> lib.imageloader(lib.to_imageref("input_image", img), 500, 600)
-              _ -> element.none()
+        html.div(
+          [
+            custom_styles,
+            attribute.style([
+              #(
+                "background",
+                result.unwrap(dict.get(model.state.inputs, "colour"), ""),
+              ),
+            ]),
+          ],
+          [
+            case model.state.route {
+              msg.Index -> index.index(model)
+              msg.About -> about.about(model)
             },
+          ],
+        ),
+        html.div(
+          [
+            case dict.get(model.state.inputs, "colour") {
+              Ok("red") -> attribute.style([#("background", "#882222")])
+              _ -> attribute.none()
+            },
+          ],
+          [carousel.carousel(model, "test", model.state.images)],
+        ),
+        ui.centre(
+          [],
+          html.div([], [
+            html.div([], [
+              lib.input_box(model, "image_input", "[image_input]", [
+                classes.text_2xl(),
+                attribute.style([#("width", "full")]),
+                input.primary(),
+              ]),
+            ]),
+            html.div([], [
+              case dict.get(model.state.inputs, "image_input") {
+                Ok("") -> element.none()
+                Ok(img) ->
+                  lib.imageloader(lib.to_imageref("input_image", img), 500, 600)
+                _ -> element.none()
+              },
+            ]),
           ]),
-        ])),
+        ),
         footer(model),
-      ])
-    ])
+      ]),
+    ]),
   ])
 }
 
 fn footer(model: Model) -> Element(Msg) {
-  html.div([attribute.style([#("height", "5rem"), #("background", case dict.get(model.state.inputs, "colour") {
-    Ok("red") -> "#552222"
-    _ -> ""
-  })])], [
-    html.p([], [element.text("footer"),])
-  ])
+  html.div(
+    [
+      attribute.style([
+        #("height", "5rem"),
+        #("background", case dict.get(model.state.inputs, "colour") {
+          Ok("red") -> "#552222"
+          _ -> ""
+        }),
+      ]),
+    ],
+    [html.p([], [element.text("footer")])],
+  )
 }
-
