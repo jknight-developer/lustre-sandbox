@@ -1,7 +1,7 @@
 import gleam/dict.{type Dict}
 import lustre/ui.{type Theme, Theme}
+import lustre_sandbox/msg.{type Route}
 
-import lustre_sandbox/route.{type Route}
 
 pub type State {
   State(

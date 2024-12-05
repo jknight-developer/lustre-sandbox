@@ -3534,11 +3534,71 @@ function setInterval(delay, callback) {
   return globalThis.setInterval(callback, delay);
 }
 
-// build/dev/javascript/lustre_sandbox/lustre_sandbox/route.mjs
+// build/dev/javascript/lustre_sandbox/lustre_sandbox/msg.mjs
+var OnRouteChange = class extends CustomType {
+  constructor(x0) {
+    super();
+    this[0] = x0;
+  }
+};
+var StateReset = class extends CustomType {
+};
+var InputUpdate = class extends CustomType {
+  constructor(x0, x1) {
+    super();
+    this[0] = x0;
+    this[1] = x1;
+  }
+};
+var IntMessage = class extends CustomType {
+  constructor(x0) {
+    super();
+    this[0] = x0;
+  }
+};
 var Index = class extends CustomType {
 };
 var About = class extends CustomType {
 };
+var IntIncrement = class extends CustomType {
+  constructor(x0) {
+    super();
+    this[0] = x0;
+  }
+};
+var IntDecrement = class extends CustomType {
+  constructor(x0) {
+    super();
+    this[0] = x0;
+  }
+};
+
+// build/dev/javascript/lustre_sandbox/lustre_sandbox/lib.mjs
+var ImageRef = class extends CustomType {
+  constructor(title, location) {
+    super();
+    this.title = title;
+    this.location = location;
+  }
+};
+function to_imageref(title, location) {
+  return new ImageRef(title, location);
+}
+function imageloader(image, width2, height2) {
+  return div(
+    toList([style(toList([["display", "flex"], ["flex-grow", "4"]]))]),
+    toList([
+      img(
+        toList([
+          src(image.location),
+          alt(image.title),
+          width(width2),
+          height(height2)
+        ])
+      )
+    ])
+  );
+}
 
 // build/dev/javascript/lustre_sandbox/lustre_sandbox/state.mjs
 var State = class extends CustomType {
@@ -3562,50 +3622,117 @@ var Model2 = class extends CustomType {
 
 // build/dev/javascript/lustre_sandbox/components/carousel.mjs
 function message_handler(model, carouselmsg) {
-  return [model, none()];
+  {
+    return [model, none()];
+  }
+}
+function carousel(model, name, images) {
+  let carousel_wrapper = style(
+    toList([
+      ["position", "relative"],
+      ["width", "80%"],
+      ["max_width", "800px"],
+      ["max-height", "600px"],
+      ["margin", "0 auto"],
+      ["overflow", "hidden"]
+    ])
+  );
+  let carousel_element = style(
+    toList([["display", "flex"], ["transition", "transform 0.5s ease-in-out"]])
+  );
+  let carousel_button = style(
+    toList([
+      ["position", "absolute"],
+      ["top", "50%"],
+      ["transform", "translateY(-50%)"],
+      ["background-color", "rgba(0, 0, 0, 0.5)"],
+      ["color", "white"],
+      ["border", "none"],
+      ["padding", "10px 20px"],
+      ["cursor", "pointer"],
+      ["z-index", "1"]
+    ])
+  );
+  return div(
+    toList([carousel_wrapper]),
+    toList([
+      div(
+        toList([carousel_element]),
+        map(
+          images,
+          (image) => {
+            return img(
+              toList([
+                src(image.location),
+                alt(image.title),
+                style(
+                  toList([["width", "100%"], ["flex-shrink", "0"]])
+                )
+              ])
+            );
+          }
+        )
+      ),
+      button(
+        toList([carousel_button, style(toList([["left", "10px"]]))]),
+        toList([caret_left(toList([]))])
+      ),
+      button(
+        toList([carousel_button, style(toList([["right", "10px"]]))]),
+        toList([caret_right(toList([]))])
+      ),
+      div(toList([]), toList([]))
+    ])
+  );
+}
+
+// build/dev/javascript/lustre_sandbox/components/ints.mjs
+function message_handler2(model, intmsg) {
+  if (intmsg instanceof IntIncrement) {
+    let name = intmsg[0];
+    return [
+      new Model2(
+        model.state.withFields({
+          ints: map_values(
+            model.state.ints,
+            (k, v) => {
+              if (k === name) {
+                let n = k;
+                return v + 1;
+              } else {
+                return v;
+              }
+            }
+          )
+        })
+      ),
+      none()
+    ];
+  } else {
+    let name = intmsg[0];
+    return [
+      new Model2(
+        model.state.withFields({
+          ints: map_values(
+            model.state.ints,
+            (k, v) => {
+              if (k === name && v > 0) {
+                let n = k;
+                let i = v;
+                return v - 1;
+              } else {
+                return v;
+              }
+            }
+          )
+        })
+      ),
+      none()
+    ];
+  }
 }
 
 // build/dev/javascript/lustre_sandbox/lustre_sandbox.mjs
-var OnRouteChange = class extends CustomType {
-  constructor(x0) {
-    super();
-    this[0] = x0;
-  }
-};
-var StateReset = class extends CustomType {
-};
-var InputUpdate = class extends CustomType {
-  constructor(x0, x1) {
-    super();
-    this[0] = x0;
-    this[1] = x1;
-  }
-};
-var IntMessage = class extends CustomType {
-  constructor(x0) {
-    super();
-    this[0] = x0;
-  }
-};
-var IntIncrement = class extends CustomType {
-  constructor(x0) {
-    super();
-    this[0] = x0;
-  }
-};
-var IntDecrement = class extends CustomType {
-  constructor(x0) {
-    super();
-    this[0] = x0;
-  }
-};
-var ImageRef = class extends CustomType {
-  constructor(title, location) {
-    super();
-    this.title = title;
-    this.location = location;
-  }
-};
 function initial_state() {
   let theme2 = new Theme(
     purple(),
@@ -3654,48 +3781,32 @@ function init3(_) {
     )
   ];
 }
-function int_message_handler(model, intmsg) {
-  if (intmsg instanceof IntIncrement) {
-    let name = intmsg[0];
+function update(model, msg) {
+  if (msg instanceof OnRouteChange) {
+    let route = msg[0];
+    return [new Model2(model.state.withFields({ route })), none()];
+  } else if (msg instanceof StateReset) {
+    return [
+      new Model2(initial_state().withFields({ route: model.state.route })),
+      none()
+    ];
+  } else if (msg instanceof InputUpdate) {
+    let name = msg[0];
+    let value3 = msg[1];
     return [
       new Model2(
         model.state.withFields({
-          ints: map_values(
-            model.state.ints,
-            (k, v) => {
-              if (k === name) {
-                let n = k;
-                return v + 1;
-              } else {
-                return v;
-              }
-            }
-          )
+          inputs: insert(model.state.inputs, name, value3)
         })
       ),
       none()
     ];
+  } else if (msg instanceof IntMessage) {
+    let intmsg = msg[0];
+    return message_handler2(model, intmsg);
   } else {
-    let name = intmsg[0];
-    return [
-      new Model2(
-        model.state.withFields({
-          ints: map_values(
-            model.state.ints,
-            (k, v) => {
-              if (k === name && v > 0) {
-                let n = k;
-                let i = v;
-                return v - 1;
-              } else {
-                return v;
-              }
-            }
-          )
-        })
-      ),
-      none()
-    ];
+    let carouselmsg = msg[0];
+    return message_handler(model, carouselmsg);
   }
 }
 function navbar(model) {
@@ -3772,108 +3883,6 @@ function navbar(model) {
         )
       ),
       hr(toList([style(toList([["opacity", "0"]]))]))
-    ])
-  );
-}
-function to_imageref(title, location) {
-  return new ImageRef(title, location);
-}
-function carousel(model, name, images) {
-  let carousel_wrapper = style(
-    toList([
-      ["position", "relative"],
-      ["width", "80%"],
-      ["max_width", "800px"],
-      ["max-height", "600px"],
-      ["margin", "0 auto"],
-      ["overflow", "hidden"]
-    ])
-  );
-  let carousel_element = style(
-    toList([["display", "flex"], ["transition", "transform 0.5s ease-in-out"]])
-  );
-  let carousel_button = style(
-    toList([
-      ["position", "absolute"],
-      ["top", "50%"],
-      ["transform", "translateY(-50%)"],
-      ["background-color", "rgba(0, 0, 0, 0.5)"],
-      ["color", "white"],
-      ["border", "none"],
-      ["padding", "10px 20px"],
-      ["cursor", "pointer"],
-      ["z-index", "1"]
-    ])
-  );
-  return div(
-    toList([carousel_wrapper]),
-    toList([
-      div(
-        toList([carousel_element]),
-        map(
-          images,
-          (image) => {
-            return img(
-              toList([
-                src(image.location),
-                alt(image.title),
-                style(
-                  toList([["width", "100%"], ["flex-shrink", "0"]])
-                )
-              ])
-            );
-          }
-        )
-      ),
-      button(
-        toList([carousel_button, style(toList([["left", "10px"]]))]),
-        toList([caret_left(toList([]))])
-      ),
-      button(
-        toList([carousel_button, style(toList([["right", "10px"]]))]),
-        toList([caret_right(toList([]))])
-      ),
-      div(toList([]), toList([]))
-    ])
-  );
-}
-function update(model, msg) {
-  if (msg instanceof OnRouteChange) {
-    let route = msg[0];
-    return [new Model2(model.state.withFields({ route })), none()];
-  } else if (msg instanceof StateReset) {
-    return [new Model2(initial_state()), none()];
-  } else if (msg instanceof InputUpdate) {
-    let name = msg[0];
-    let value3 = msg[1];
-    return [
-      new Model2(
-        model.state.withFields({
-          inputs: insert(model.state.inputs, name, value3)
-        })
-      ),
-      none()
-    ];
-  } else if (msg instanceof IntMessage) {
-    let intmsg = msg[0];
-    return int_message_handler(model, intmsg);
-  } else {
-    let carouselmsg = msg[0];
-    return message_handler(model, carouselmsg);
-  }
-}
-function imageloader(image, width2, height2) {
-  return div(
-    toList([style(toList([["display", "flex"], ["flex-grow", "4"]]))]),
-    toList([
-      img(
-        toList([
-          src(image.location),
-          alt(image.title),
-          width(500),
-          height(600)
-        ])
-      )
     ])
   );
 }
@@ -3981,7 +3990,7 @@ function do_fizzbuzz(loop$num, loop$acc, loop$textlist) {
       throw makeError(
         "panic",
         "lustre_sandbox",
-        272,
+        183,
         "do_fizzbuzz",
         "panic expression evaluated",
         {}
@@ -4086,28 +4095,26 @@ function index2(model) {
               toList([text("lorem ipsum whatever man who cares")])
             )
           ),
-          centre2(
-            toList([]),
-            div(
-              toList([]),
-              toList([
-                aside2(
-                  toList([]),
-                  button3(
-                    toList([
-                      on_click(new IntMessage(new IntDecrement("icons")))
-                    ]),
-                    toList([text("-")])
-                  ),
-                  button3(
-                    toList([
-                      on_click(new IntMessage(new IntIncrement("icons")))
-                    ]),
-                    toList([text("+")])
+          div(
+            toList([style(toList([["display", "flex"]]))]),
+            toList([
+              button3(
+                toList([
+                  on_click(
+                    new IntMessage(new IntDecrement("icons"))
                   )
-                )
-              ])
-            )
+                ]),
+                toList([text("-")])
+              ),
+              button3(
+                toList([
+                  on_click(
+                    new IntMessage(new IntIncrement("icons"))
+                  )
+                ]),
+                toList([text("+")])
+              )
+            ])
           )
         ])
       ),
@@ -4196,7 +4203,9 @@ function about(model) {
       centre2(
         toList([warning(), pb_lg()]),
         button3(
-          toList([on_click(new IntMessage(new IntIncrement("fizzbuzz")))]),
+          toList([
+            on_click(new IntMessage(new IntIncrement("fizzbuzz")))
+          ]),
           toList([
             p(
               toList([font_alt(), text_5xl()]),
