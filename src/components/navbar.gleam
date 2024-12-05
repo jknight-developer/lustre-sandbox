@@ -10,7 +10,7 @@ import lustre_sandbox/lib/msg.{type Msg}
 import lustre_sandbox/lib/types.{type Model}
 
 pub fn navbar(model: Model) -> Element(Msg) {
-  html.div([classes.shadow_md()], [
+  html.div([classes.shadow_md(), classes.py_md()], [
     ui.centre(
       [],
       html.nav([], [

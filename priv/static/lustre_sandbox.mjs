@@ -2661,6 +2661,12 @@ function p(attrs, children2) {
 function a(attrs, children2) {
   return element("a", attrs, children2);
 }
+function em(attrs, children2) {
+  return element("em", attrs, children2);
+}
+function strong(attrs, children2) {
+  return element("strong", attrs, children2);
+}
 function img(attrs) {
   return element("img", attrs, toList([]));
 }
@@ -2672,17 +2678,6 @@ function button(attrs, children2) {
 }
 function input(attrs) {
   return element("input", attrs, toList([]));
-}
-
-// build/dev/javascript/lustre_ui/lustre/ui/aside.mjs
-function of(element2, attributes, side, main2) {
-  return element2(
-    prepend(class$("lustre-ui-aside"), attributes),
-    toList([side, main2])
-  );
-}
-function aside(attributes, side, main2) {
-  return of(div, attributes, side, main2);
 }
 
 // build/dev/javascript/lustre_ui/lustre/ui/button.mjs
@@ -2707,19 +2702,22 @@ function error() {
 function warning() {
   return attribute("data-variant", "warning");
 }
+function success() {
+  return attribute("data-variant", "success");
+}
 function info() {
   return attribute("data-variant", "info");
 }
 
 // build/dev/javascript/lustre_ui/lustre/ui/centre.mjs
-function of2(element2, attributes, children2) {
+function of(element2, attributes, children2) {
   return element2(
     prepend(class$("lustre-ui-centre"), attributes),
     toList([children2])
   );
 }
 function centre(attributes, children2) {
-  return of2(div, attributes, children2);
+  return of(div, attributes, children2);
 }
 function inline() {
   return class$("inline");
@@ -2909,7 +2907,7 @@ function to_css_rgba_string(colour) {
 
 // build/dev/javascript/lustre_ui/lustre/ui/colour.mjs
 var Scale = class extends CustomType {
-  constructor(app_background, app_background_subtle, app_border, element_background, element_background_hover, element_background_strong, element_border_subtle, element_border_strong, solid_background, solid_background_hover, text_high_contrast, text_low_contrast) {
+  constructor(app_background, app_background_subtle, app_border, element_background, element_background_hover, element_background_strong, element_border_subtle, element_border_strong, solid_background, solid_background_hover, text_high_contrast2, text_low_contrast) {
     super();
     this.app_background = app_background;
     this.app_background_subtle = app_background_subtle;
@@ -2921,7 +2919,7 @@ var Scale = class extends CustomType {
     this.element_border_strong = element_border_strong;
     this.solid_background = solid_background;
     this.solid_background_hover = solid_background_hover;
-    this.text_high_contrast = text_high_contrast;
+    this.text_high_contrast = text_high_contrast2;
     this.text_low_contrast = text_low_contrast;
   }
 };
@@ -3057,7 +3055,7 @@ function from_radix_scale(a2, b, c, d, e, f, g, h, i, j, k, l) {
       { value: $10 }
     );
   }
-  let text_high_contrast = $10[0];
+  let text_high_contrast2 = $10[0];
   let $11 = from_rgb_hex(l);
   if (!$11.isOk()) {
     throw makeError(
@@ -3081,7 +3079,7 @@ function from_radix_scale(a2, b, c, d, e, f, g, h, i, j, k, l) {
     element_border_strong,
     solid_background,
     solid_background_hover,
-    text_high_contrast,
+    text_high_contrast2,
     text_low_contrast
   );
 }
@@ -3183,14 +3181,14 @@ function green() {
 }
 
 // build/dev/javascript/lustre_ui/lustre/ui/stack.mjs
-function of3(element2, attributes, children2) {
+function of2(element2, attributes, children2) {
   return element2(
     prepend(class$("lustre-ui-stack"), attributes),
     children2
   );
 }
 function stack(attributes, children2) {
-  return of3(div, attributes, children2);
+  return of2(div, attributes, children2);
 }
 
 // build/dev/javascript/lustre_ui/lustre/ui/input.mjs
@@ -3204,14 +3202,14 @@ function primary() {
 }
 
 // build/dev/javascript/lustre_ui/lustre/ui/prose.mjs
-function of4(element2, attributes, children2) {
+function of3(element2, attributes, children2) {
   return element2(
     prepend(class$("lustre-ui-prose"), attributes),
     children2
   );
 }
 function prose(attributes, children2) {
-  return of4(div, attributes, children2);
+  return of3(div, attributes, children2);
 }
 function full() {
   return class$("full");
@@ -3219,17 +3217,16 @@ function full() {
 
 // build/dev/javascript/lustre_ui/lustre/ui.mjs
 var Theme = class extends CustomType {
-  constructor(primary2, greyscale, error2, warning2, success, info2) {
+  constructor(primary2, greyscale, error2, warning2, success2, info2) {
     super();
     this.primary = primary2;
     this.greyscale = greyscale;
     this.error = error2;
     this.warning = warning2;
-    this.success = success;
+    this.success = success2;
     this.info = info2;
   }
 };
-var aside2 = aside;
 var button3 = button2;
 var centre2 = centre;
 var input3 = input2;
@@ -3670,47 +3667,6 @@ function message_handler2(model, intmsg) {
   }
 }
 
-// build/dev/javascript/lustre_ui/lustre/ui/classes.mjs
-function text_md() {
-  return class$("text-md");
-}
-function text_lg() {
-  return class$("text-lg");
-}
-function text_xl() {
-  return class$("text-xl");
-}
-function text_2xl() {
-  return class$("text-2xl");
-}
-function text_3xl() {
-  return class$("text-3xl");
-}
-function text_4xl() {
-  return class$("text-4xl");
-}
-function text_5xl() {
-  return class$("text-5xl");
-}
-function pb_lg() {
-  return class$("pb-lg");
-}
-function my_lg() {
-  return class$("my-lg");
-}
-function mt_md() {
-  return class$("mt-md");
-}
-function font_alt() {
-  return class$("font-alt");
-}
-function font_mono() {
-  return class$("font-mono");
-}
-function shadow_md() {
-  return class$("shadow-md");
-}
-
 // build/dev/javascript/lustre_sandbox/components/footer.mjs
 function footer(model) {
   return div(
@@ -3736,10 +3692,69 @@ function footer(model) {
   );
 }
 
+// build/dev/javascript/lustre_ui/lustre/ui/classes.mjs
+function bg_app_subtle() {
+  return class$("bg-app-subtle");
+}
+function bg_element_hover() {
+  return class$("bg-element-hover");
+}
+function text_high_contrast() {
+  return class$("text-high-contrast");
+}
+function text_lg() {
+  return class$("text-lg");
+}
+function text_xl() {
+  return class$("text-xl");
+}
+function text_2xl() {
+  return class$("text-2xl");
+}
+function text_3xl() {
+  return class$("text-3xl");
+}
+function text_4xl() {
+  return class$("text-4xl");
+}
+function text_5xl() {
+  return class$("text-5xl");
+}
+function p_lg() {
+  return class$("p-lg");
+}
+function py_md() {
+  return class$("py-md");
+}
+function pb_lg() {
+  return class$("pb-lg");
+}
+function pb_xl() {
+  return class$("pb-xl");
+}
+function mx_5xl() {
+  return class$("mx-5xl");
+}
+function my_lg() {
+  return class$("my-lg");
+}
+function mt_md() {
+  return class$("mt-md");
+}
+function font_alt() {
+  return class$("font-alt");
+}
+function font_mono() {
+  return class$("font-mono");
+}
+function shadow_md() {
+  return class$("shadow-md");
+}
+
 // build/dev/javascript/lustre_sandbox/components/navbar.mjs
 function navbar(model) {
   return div(
-    toList([shadow_md()]),
+    toList([shadow_md(), py_md()]),
     toList([
       centre2(
         toList([]),
@@ -3813,82 +3828,6 @@ function navbar(model) {
       hr(toList([style(toList([["opacity", "0"]]))]))
     ])
   );
-}
-
-// build/dev/javascript/lustre_sandbox/lustre_sandbox/lib.mjs
-function to_imageref(title, location) {
-  return new ImageRef(title, location);
-}
-function imageloader(image, width2, height2) {
-  return div(
-    toList([style(toList([["display", "flex"], ["flex-grow", "4"]]))]),
-    toList([
-      img(
-        toList([
-          src(image.location),
-          alt(image.title),
-          width(width2),
-          height(height2)
-        ])
-      )
-    ])
-  );
-}
-function do_element_clones(loop$amount, loop$element, loop$acc) {
-  while (true) {
-    let amount = loop$amount;
-    let element2 = loop$element;
-    let acc = loop$acc;
-    if (amount <= 0) {
-      let x = amount;
-      return acc;
-    } else {
-      loop$amount = amount - 1;
-      loop$element = element2;
-      loop$acc = flatten(toList([acc, toList([element2])]));
-    }
-  }
-}
-function element_clones(amount, element2) {
-  return do_element_clones(amount, element2, toList([]));
-}
-function input_box(model, name, placeholder2, attrs) {
-  let $ = get(model.state.inputs, name);
-  if ($.isOk() && $[0] !== "") {
-    let item = $[0];
-    return input3(
-      flatten(
-        toList([
-          toList([
-            on_input(
-              (_capture) => {
-                return new InputUpdate(name, _capture);
-              }
-            )
-          ]),
-          toList([value(item)]),
-          attrs,
-          toList([placeholder(placeholder2)])
-        ])
-      )
-    );
-  } else {
-    return input3(
-      flatten(
-        toList([
-          toList([
-            on_input(
-              (_capture) => {
-                return new InputUpdate(name, _capture);
-              }
-            )
-          ]),
-          attrs,
-          toList([placeholder(placeholder2)])
-        ])
-      )
-    );
-  }
 }
 
 // build/dev/javascript/lustre_sandbox/components/fizzbuzz.mjs
@@ -4074,10 +4013,86 @@ function about(model) {
   );
 }
 
+// build/dev/javascript/lustre_sandbox/lustre_sandbox/lib.mjs
+function to_imageref(title, location) {
+  return new ImageRef(title, location);
+}
+function imageloader(image, width2, height2) {
+  return div(
+    toList([style(toList([["display", "flex"], ["flex-grow", "4"]]))]),
+    toList([
+      img(
+        toList([
+          src(image.location),
+          alt(image.title),
+          width(width2),
+          height(height2)
+        ])
+      )
+    ])
+  );
+}
+function do_element_clones(loop$amount, loop$element, loop$acc) {
+  while (true) {
+    let amount = loop$amount;
+    let element2 = loop$element;
+    let acc = loop$acc;
+    if (amount <= 0) {
+      let x = amount;
+      return acc;
+    } else {
+      loop$amount = amount - 1;
+      loop$element = element2;
+      loop$acc = flatten(toList([acc, toList([element2])]));
+    }
+  }
+}
+function element_clones(amount, element2) {
+  return do_element_clones(amount, element2, toList([]));
+}
+function input_box(model, name, placeholder2, attrs) {
+  let $ = get(model.state.inputs, name);
+  if ($.isOk() && $[0] !== "") {
+    let item = $[0];
+    return input3(
+      flatten(
+        toList([
+          toList([
+            on_input(
+              (_capture) => {
+                return new InputUpdate(name, _capture);
+              }
+            )
+          ]),
+          toList([value(item)]),
+          attrs,
+          toList([placeholder(placeholder2)])
+        ])
+      )
+    );
+  } else {
+    return input3(
+      flatten(
+        toList([
+          toList([
+            on_input(
+              (_capture) => {
+                return new InputUpdate(name, _capture);
+              }
+            )
+          ]),
+          attrs,
+          toList([placeholder(placeholder2)])
+        ])
+      )
+    );
+  }
+}
+
 // build/dev/javascript/lustre_sandbox/pages/index.mjs
 function index2(model) {
   return div(
-    toList([]),
+    toList([bg_app_subtle()]),
     toList([
       div(
         toList([]),
@@ -4085,22 +4100,48 @@ function index2(model) {
           centre2(
             toList([]),
             p(
-              toList([text_md()]),
-              toList([text("INDEX")])
+              toList([text_2xl()]),
+              toList([
+                strong(
+                  toList([]),
+                  toList([
+                    em(toList([]), toList([text("INDEX")]))
+                  ])
+                )
+              ])
             )
           ),
           centre2(
             toList([mt_md()]),
             p(
-              toList([font_mono(), text_lg()]),
-              toList([text("lorem ipsum whatever man who cares")])
+              toList([
+                font_mono(),
+                text_lg(),
+                pb_lg()
+              ]),
+              toList([
+                text(
+                  "lorem ipsum whatever my friend it's good to see you"
+                )
+              ])
             )
           ),
           div(
-            toList([style(toList([["display", "flex"]]))]),
+            toList([
+              style(
+                toList([
+                  ["display", "flex"],
+                  ["justify-content", "center"],
+                  ["gap", "10px"]
+                ])
+              )
+            ]),
             toList([
               button3(
                 toList([
+                  info(),
+                  solid(),
+                  style(toList([["width", "100px"]])),
                   on_click(
                     new IntMessage(new IntDecrement("icons"))
                   )
@@ -4109,6 +4150,9 @@ function index2(model) {
               ),
               button3(
                 toList([
+                  success(),
+                  solid(),
+                  style(toList([["width", "100px"]])),
                   on_click(
                     new IntMessage(new IntIncrement("icons"))
                   )
@@ -4141,44 +4185,152 @@ function index2(model) {
         toList([my_lg()]),
         p(
           toList([text_4xl(), font_alt()]),
-          toList([text("What is your name my friend?")])
+          toList([text("What is your name, my friend?")])
         )
       ),
       div(
-        toList([]),
         toList([
-          centre2(
-            toList([]),
-            aside2(
-              toList([]),
+          style(
+            toList([
+              ["display", "flex"],
+              ["justify-content", "space-evenly"],
+              ["align-items", "center"],
+              ["gap", "4rem"]
+            ])
+          ),
+          mx_5xl(),
+          pb_xl()
+        ]),
+        toList([
+          div(
+            toList([
+              style(
+                toList([["width", "100%"], ["min-width", "50%"]])
+              )
+            ]),
+            toList([
               input_box(
                 model,
                 "name",
-                "[your text here]",
+                "[your name]",
                 toList([
                   text_2xl(),
-                  style(toList([["max-width", "50%"]])),
+                  style(
+                    toList([
+                      ["width", "100%"],
+                      ["display", "flex"],
+                      ["justify-content", "center"],
+                      ["text-align", "center"]
+                    ])
+                  ),
                   primary()
                 ])
-              ),
-              centre2(
-                toList([]),
-                p(
-                  toList([text_2xl()]),
-                  toList([
-                    (() => {
-                      let $ = get(model.state.inputs, "name");
-                      if ($.isOk() && $[0] !== "") {
-                        let value3 = $[0];
-                        return text("What's up, " + value3 + "?");
-                      } else {
-                        return text("What's up, [name]?");
-                      }
-                    })()
-                  ])
-                )
               )
-            )
+            ])
+          ),
+          div(
+            toList([
+              style(
+                toList([["width", "100%"], ["max-width", "50%"]])
+              )
+            ]),
+            toList([
+              p(
+                toList([
+                  text_2xl(),
+                  style(toList([["text-align", "center"]]))
+                ]),
+                toList([
+                  (() => {
+                    let $ = get(model.state.inputs, "name");
+                    if ($.isOk() && $[0] !== "") {
+                      let value3 = $[0];
+                      return text("What's up, " + value3 + "?");
+                    } else {
+                      return text("What's up, [name]?");
+                    }
+                  })()
+                ])
+              )
+            ])
+          )
+        ])
+      ),
+      div(
+        toList([
+          pb_lg(),
+          (() => {
+            let $ = get(model.state.inputs, "colour");
+            if ($.isOk() && $[0] === "red") {
+              return style(toList([["background", "#882222"]]));
+            } else {
+              return none2();
+            }
+          })()
+        ]),
+        toList([carousel(model, "test", model.state.images)])
+      ),
+      div(
+        toList([
+          bg_element_hover(),
+          pb_lg(),
+          style(
+            toList([
+              ["display", "flex"],
+              ["flex-direction", "column"],
+              ["justify-content", "center"],
+              ["width", "100%"],
+              ["align-items", "center"]
+            ])
+          )
+        ]),
+        toList([
+          p(
+            toList([
+              text_2xl(),
+              p_lg(),
+              text_high_contrast()
+            ]),
+            toList([
+              text("Input an image url below to load it on screen")
+            ])
+          ),
+          div(
+            toList([]),
+            toList([
+              input_box(
+                model,
+                "image_input",
+                "[image_url]",
+                toList([
+                  text_2xl(),
+                  style(
+                    toList([["width", "full"], ["text-align", "center"]])
+                  ),
+                  primary()
+                ])
+              )
+            ])
+          ),
+          div(
+            toList([]),
+            toList([
+              (() => {
+                let $ = get(model.state.inputs, "image_input");
+                if ($.isOk() && $[0] === "") {
+                  return none3();
+                } else if ($.isOk()) {
+                  let img2 = $[0];
+                  return imageloader(
+                    to_imageref("input_image", img2),
+                    500,
+                    600
+                  );
+                } else {
+                  return none3();
+                }
+              })()
+            ])
           )
         ])
       )
@@ -4216,62 +4368,6 @@ function app(model) {
             }
           })()
         ])
-      ),
-      div(
-        toList([
-          (() => {
-            let $ = get(model.state.inputs, "colour");
-            if ($.isOk() && $[0] === "red") {
-              return style(toList([["background", "#882222"]]));
-            } else {
-              return none2();
-            }
-          })()
-        ]),
-        toList([carousel(model, "test", model.state.images)])
-      ),
-      centre2(
-        toList([]),
-        div(
-          toList([]),
-          toList([
-            div(
-              toList([]),
-              toList([
-                input_box(
-                  model,
-                  "image_input",
-                  "[image_input]",
-                  toList([
-                    text_2xl(),
-                    style(toList([["width", "full"]])),
-                    primary()
-                  ])
-                )
-              ])
-            ),
-            div(
-              toList([]),
-              toList([
-                (() => {
-                  let $ = get(model.state.inputs, "image_input");
-                  if ($.isOk() && $[0] === "") {
-                    return none3();
-                  } else if ($.isOk()) {
-                    let img2 = $[0];
-                    return imageloader(
-                      to_imageref("input_image", img2),
-                      500,
-                      600
-                    );
-                  } else {
-                    return none3();
-                  }
-                })()
-              ])
-            )
-          ])
-        )
       ),
       footer(model)
     ])
