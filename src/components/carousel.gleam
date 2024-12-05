@@ -3,7 +3,7 @@ import lustre/attribute
 import lustre/effect
 import lustre/element.{type Element}
 import lustre/element/html
-import lustre/event
+// import lustre/event
 import lustre/ui/icon
 import lustre_sandbox/lib/msg.{type CarouselMsg, type Msg}
 import lustre_sandbox/lib/types.{type ImageRef, type Model}
@@ -15,8 +15,8 @@ pub fn message_handler(model: Model, carouselmsg: CarouselMsg) {
 }
 
 pub fn carousel(
-  model: Model,
-  name: String,
+  _model: Model,
+  _name: String,
   images: List(ImageRef),
 ) -> Element(Msg) {
   let carousel_wrapper =

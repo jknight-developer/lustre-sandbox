@@ -1,5 +1,4 @@
 import gleam/dict
-import gleam/result
 import gleam/uri.{type Uri}
 import lustre
 import lustre/attribute

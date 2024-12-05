@@ -3418,31 +3418,6 @@ function setInterval(delay, callback) {
   return globalThis.setInterval(callback, delay);
 }
 
-// build/dev/javascript/lustre/lustre/event.mjs
-function on2(name, handler) {
-  return on(name, handler);
-}
-function on_click(msg) {
-  return on2("click", (_) => {
-    return new Ok(msg);
-  });
-}
-function value2(event2) {
-  let _pipe = event2;
-  return field("target", field("value", string))(
-    _pipe
-  );
-}
-function on_input(msg) {
-  return on2(
-    "input",
-    (event2) => {
-      let _pipe = value2(event2);
-      return map2(_pipe, msg);
-    }
-  );
-}
-
 // build/dev/javascript/lustre/lustre/element/svg.mjs
 var namespace = "http://www.w3.org/2000/svg";
 function path(attrs) {
@@ -3561,7 +3536,7 @@ function message_handler(model, carouselmsg) {
     return [model, none()];
   }
 }
-function carousel(model, name, images) {
+function carousel(_, _1, images) {
   let carousel_wrapper = style(
     toList([
       ["position", "relative"],
@@ -3689,6 +3664,31 @@ function footer(model) {
       )
     ]),
     toList([p(toList([]), toList([text("footer")]))])
+  );
+}
+
+// build/dev/javascript/lustre/lustre/event.mjs
+function on2(name, handler) {
+  return on(name, handler);
+}
+function on_click(msg) {
+  return on2("click", (_) => {
+    return new Ok(msg);
+  });
+}
+function value2(event2) {
+  let _pipe = event2;
+  return field("target", field("value", string))(
+    _pipe
+  );
+}
+function on_input(msg) {
+  return on2(
+    "input",
+    (event2) => {
+      let _pipe = value2(event2);
+      return map2(_pipe, msg);
+    }
   );
 }
 
@@ -4487,7 +4487,7 @@ function main() {
     throw makeError(
       "assignment_no_match",
       "lustre_sandbox",
-      25,
+      24,
       "main",
       "Assignment pattern did not match",
       { value: $ }

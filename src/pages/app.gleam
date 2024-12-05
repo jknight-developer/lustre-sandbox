@@ -1,4 +1,3 @@
-import components/carousel
 import components/footer
 import components/navbar
 import gleam/dict
