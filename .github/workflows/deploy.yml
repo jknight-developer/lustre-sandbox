@@ -28,7 +28,7 @@ jobs:
       - name: Install dependencies
         run: gleam deps download
       - name: Build app
-        run: gleam run -m lustre/dev build lustre_sandbox --minify
+        run: gleam run -m lustre/dev build app --minify
       - name: Copy output to dist
         run: |
           mkdir -p dist
