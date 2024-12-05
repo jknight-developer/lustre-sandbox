@@ -3762,7 +3762,7 @@ function navbar(model) {
           toList([]),
           toList([
             a(
-              toList([href("/")]),
+              toList([href("/lustre-sandbox/")]),
               toList([
                 button3(
                   toList([on_click(new InputUpdate("colour", ""))]),
@@ -3814,7 +3814,7 @@ function navbar(model) {
             ),
             a(toList([]), toList([text(" | ")])),
             a(
-              toList([href("/about")]),
+              toList([href("/lustre-sandbox/about")]),
               toList([
                 button3(
                   toList([info(), outline(), warning()]),

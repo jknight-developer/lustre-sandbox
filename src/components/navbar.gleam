@@ -14,7 +14,7 @@ pub fn navbar(model: Model) -> Element(Msg) {
     ui.centre(
       [],
       html.nav([], [
-        html.a([attribute.href("/")], [
+        html.a([attribute.href("/lustre-sandbox/")], [
           ui.button([event.on_click(msg.InputUpdate("colour", ""))], [
             element.text("Index"),
           ]),
@@ -50,7 +50,7 @@ pub fn navbar(model: Model) -> Element(Msg) {
           ),
         ]),
         html.a([], [element.text(" | ")]),
-        html.a([attribute.href("/about")], [
+        html.a([attribute.href("/lustre-sandbox/about")], [
           ui.button([button.info(), button.outline(), button.warning()], [
             element.text("About"),
           ]),
