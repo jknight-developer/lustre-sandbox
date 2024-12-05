@@ -1,36 +1,24 @@
 import gleam/dict
-import gleam/list
 import gleam/result
 import gleam/uri.{type Uri}
 import lustre
-import lustre/attribute.{type Attribute}
+import lustre/attribute
 import lustre/effect.{type Effect}
 import lustre/element.{type Element}
 import lustre/element/html
-import lustre/event
 import lustre/ui.{type Theme, Theme}
-import lustre/ui/button
-import lustre/ui/classes
 import lustre/ui/colour
-import lustre/ui/icon
-import lustre/ui/input
-import lustre/ui/prose
 import lustre/ui/styles
 import modem
 import plinth/javascript/global
 
 import components/carousel
-import components/fizzbuzz
 import components/ints
-import components/navbar
-import lustre_sandbox/lib
 import lustre_sandbox/lib/msg.{type Msg}
 import lustre_sandbox/lib/types.{
   type ImageRef, type Model, type State, ImageRef, Model, State,
 }
-import pages/about
 import pages/app
-import pages/index
 
 pub fn main() {
   let app = lustre.application(init, update, view)
@@ -124,84 +112,11 @@ fn update(model: Model, msg: Msg) -> #(Model, Effect(Msg)) {
 }
 
 fn view(model: Model) -> Element(Msg) {
-  let custom_styles =
-    attribute.style([
-      #("width", "full"),
-      #("margin", "0 auto"),
-      #("padding", "2rem"),
-    ])
-
-  // welcome to lustre, it's react jsx but gleam
   html.div([], [
     ui.stack([attribute.id("container")], [
       styles.theme(model.state.theme),
       styles.elements(),
-      html.div([], [
-        navbar.navbar(model),
-        // Routing
-        html.div(
-          [
-            custom_styles,
-            attribute.style([
-              #(
-                "background",
-                result.unwrap(dict.get(model.state.inputs, "colour"), ""),
-              ),
-            ]),
-          ],
-          [
-            case model.state.route {
-              msg.Index -> index.index(model)
-              msg.About -> about.about(model)
-            },
-          ],
-        ),
-        html.div(
-          [
-            case dict.get(model.state.inputs, "colour") {
-              Ok("red") -> attribute.style([#("background", "#882222")])
-              _ -> attribute.none()
-            },
-          ],
-          [carousel.carousel(model, "test", model.state.images)],
-        ),
-        ui.centre(
-          [],
-          html.div([], [
-            html.div([], [
-              lib.input_box(model, "image_input", "[image_input]", [
-                classes.text_2xl(),
-                attribute.style([#("width", "full")]),
-                input.primary(),
-              ]),
-            ]),
-            html.div([], [
-              case dict.get(model.state.inputs, "image_input") {
-                Ok("") -> element.none()
-                Ok(img) ->
-                  lib.imageloader(lib.to_imageref("input_image", img), 500, 600)
-                _ -> element.none()
-              },
-            ]),
-          ]),
-        ),
-        footer(model),
-      ]),
+      app.app(model)
     ]),
   ])
-}
-
-fn footer(model: Model) -> Element(Msg) {
-  html.div(
-    [
-      attribute.style([
-        #("height", "5rem"),
-        #("background", case dict.get(model.state.inputs, "colour") {
-          Ok("red") -> "#552222"
-          _ -> ""
-        }),
-      ]),
-    ],
-    [html.p([], [element.text("footer")])],
-  )
 }

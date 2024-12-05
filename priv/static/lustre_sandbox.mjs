@@ -2364,8 +2364,8 @@ var LustreClientApplication = class _LustreClientApplication {
     const root = selector instanceof HTMLElement ? selector : document.querySelector(selector);
     if (!root)
       return new Error(new ElementNotFound(selector));
-    const app = new _LustreClientApplication(root, init4(flags), update2, view2);
-    return new Ok((action) => app.send(action));
+    const app2 = new _LustreClientApplication(root, init4(flags), update2, view2);
+    return new Ok((action) => app2.send(action));
   }
   /**
    * @param {Element} root
@@ -2494,13 +2494,13 @@ var LustreClientApplication = class _LustreClientApplication {
 var start = LustreClientApplication.start;
 var LustreServerApplication = class _LustreServerApplication {
   static start({ init: init4, update: update2, view: view2, on_attribute_change }, flags) {
-    const app = new _LustreServerApplication(
+    const app2 = new _LustreServerApplication(
       init4(flags),
       update2,
       view2,
       on_attribute_change
     );
-    return new Ok((action) => app.send(action));
+    return new Ok((action) => app2.send(action));
   }
   constructor([model, effects], update2, view2, on_attribute_change) {
     this.#model = model;
@@ -2626,12 +2626,12 @@ var NotABrowser = class extends CustomType {
 function application(init4, update2, view2) {
   return new App(init4, update2, view2, new None());
 }
-function start2(app, selector, flags) {
+function start2(app2, selector, flags) {
   return guard(
     !is_browser(),
     new Error(new NotABrowser()),
     () => {
-      return start(app, selector, flags);
+      return start(app2, selector, flags);
     }
   );
 }
@@ -2672,31 +2672,6 @@ function button(attrs, children2) {
 }
 function input(attrs) {
   return element("input", attrs, toList([]));
-}
-
-// build/dev/javascript/lustre/lustre/event.mjs
-function on2(name, handler) {
-  return on(name, handler);
-}
-function on_click(msg) {
-  return on2("click", (_) => {
-    return new Ok(msg);
-  });
-}
-function value2(event2) {
-  let _pipe = event2;
-  return field("target", field("value", string))(
-    _pipe
-  );
-}
-function on_input(msg) {
-  return on2(
-    "input",
-    (event2) => {
-      let _pipe = value2(event2);
-      return map2(_pipe, msg);
-    }
-  );
 }
 
 // build/dev/javascript/lustre_ui/lustre/ui/aside.mjs
@@ -3261,94 +3236,6 @@ var input3 = input2;
 var prose2 = prose;
 var stack2 = stack;
 
-// build/dev/javascript/lustre_ui/lustre/ui/classes.mjs
-function text_md() {
-  return class$("text-md");
-}
-function text_lg() {
-  return class$("text-lg");
-}
-function text_xl() {
-  return class$("text-xl");
-}
-function text_2xl() {
-  return class$("text-2xl");
-}
-function text_3xl() {
-  return class$("text-3xl");
-}
-function text_4xl() {
-  return class$("text-4xl");
-}
-function text_5xl() {
-  return class$("text-5xl");
-}
-function pb_lg() {
-  return class$("pb-lg");
-}
-function my_lg() {
-  return class$("my-lg");
-}
-function mt_md() {
-  return class$("mt-md");
-}
-function font_alt() {
-  return class$("font-alt");
-}
-function font_mono() {
-  return class$("font-mono");
-}
-function shadow_md() {
-  return class$("shadow-md");
-}
-
-// build/dev/javascript/lustre/lustre/element/svg.mjs
-var namespace = "http://www.w3.org/2000/svg";
-function path(attrs) {
-  return namespaced(namespace, "path", attrs, toList([]));
-}
-
-// build/dev/javascript/lustre_ui/lustre/ui/icon.mjs
-function icon(attrs, path2) {
-  return svg(
-    prepend(
-      class$("lustre-ui-icon"),
-      prepend(
-        attribute("viewBox", "0 0 15 15"),
-        prepend(attribute("fill", "none"), attrs)
-      )
-    ),
-    toList([
-      path(
-        toList([
-          attribute("d", path2),
-          attribute("fill", "currentColor"),
-          attribute("fill-rule", "evenodd"),
-          attribute("clip-rule", "evenodd")
-        ])
-      )
-    ])
-  );
-}
-function caret_left(attrs) {
-  return icon(
-    attrs,
-    "M8.81809 4.18179C8.99383 4.35753 8.99383 4.64245 8.81809 4.81819L6.13629 7.49999L8.81809 10.1818C8.99383 10.3575 8.99383 10.6424 8.81809 10.8182C8.64236 10.9939 8.35743 10.9939 8.1817 10.8182L5.1817 7.81819C5.09731 7.73379 5.0499 7.61933 5.0499 7.49999C5.0499 7.38064 5.09731 7.26618 5.1817 7.18179L8.1817 4.18179C8.35743 4.00605 8.64236 4.00605 8.81809 4.18179Z"
-  );
-}
-function caret_right(attrs) {
-  return icon(
-    attrs,
-    "M6.18194 4.18185C6.35767 4.00611 6.6426 4.00611 6.81833 4.18185L9.81833 7.18185C9.90272 7.26624 9.95013 7.3807 9.95013 7.50005C9.95013 7.6194 9.90272 7.73386 9.81833 7.81825L6.81833 10.8182C6.6426 10.994 6.35767 10.994 6.18194 10.8182C6.0062 10.6425 6.0062 10.3576 6.18194 10.1819L8.86374 7.50005L6.18194 4.81825C6.0062 4.64251 6.0062 4.35759 6.18194 4.18185Z"
-  );
-}
-function sketch_logo(attrs) {
-  return icon(
-    attrs,
-    "M7.53731 0.826873C7.5125 0.824392 7.4875 0.824392 7.46269 0.826873L3.96269 1.17687C3.85672 1.18747 3.76025 1.24262 3.69736 1.32857L0.699771 5.42528C0.654046 5.48627 0.62647 5.56165 0.625057 5.6434C0.625019 5.6456 0.625 5.64781 0.625 5.65001C0.625 5.65052 0.625001 5.65103 0.625003 5.65153C0.625363 5.74237 0.658021 5.82559 0.712087 5.8903L7.21042 13.7883C7.28165 13.8749 7.38789 13.925 7.5 13.925C7.61211 13.925 7.71835 13.8749 7.78958 13.7883L14.2879 5.89031C14.342 5.8256 14.3746 5.74237 14.375 5.65153C14.375 5.65103 14.375 5.65052 14.375 5.65001C14.375 5.64849 14.375 5.64697 14.375 5.64545C14.3749 5.63963 14.3747 5.63382 14.3744 5.62801C14.37 5.55219 14.3431 5.48242 14.3002 5.42527L11.3026 1.32857C11.2397 1.24262 11.1433 1.18747 11.0373 1.17687L7.53731 0.826873ZM10.925 5.27501V5.25236L10.9223 5.27501H10.925ZM10.9342 5.17498H13.1877L11.2495 2.5261L10.9342 5.17498ZM10.5707 1.88395L8.04432 1.63131L10.1747 5.21034L10.5707 1.88395ZM6.95568 1.63131L4.42931 1.88395L4.82531 5.21034L6.95568 1.63131ZM3.75046 2.5261L1.81226 5.17498H4.0658L3.75046 2.5261ZM1.79416 6.02501L6.75861 12.0587L4.22371 6.0669C4.21787 6.0531 4.21314 6.0391 4.20949 6.02501H1.79416ZM5.15055 6.02501L7.49999 12.1085L9.84943 6.02501H9.78681H5.21319H5.15055ZM10.7905 6.02501C10.7869 6.0391 10.7821 6.0531 10.7763 6.0669L8.24139 12.0587L13.2058 6.02501H10.7905ZM7.5 2.18317L9.34038 5.27501H5.65962L7.5 2.18317Z"
-  );
-}
-
 // build/dev/javascript/lustre_ui/lustre/ui/styles.mjs
 function scale_to_dict(scale, prefix) {
   return from_list(
@@ -3534,6 +3421,78 @@ function setInterval(delay, callback) {
   return globalThis.setInterval(callback, delay);
 }
 
+// build/dev/javascript/lustre/lustre/event.mjs
+function on2(name, handler) {
+  return on(name, handler);
+}
+function on_click(msg) {
+  return on2("click", (_) => {
+    return new Ok(msg);
+  });
+}
+function value2(event2) {
+  let _pipe = event2;
+  return field("target", field("value", string))(
+    _pipe
+  );
+}
+function on_input(msg) {
+  return on2(
+    "input",
+    (event2) => {
+      let _pipe = value2(event2);
+      return map2(_pipe, msg);
+    }
+  );
+}
+
+// build/dev/javascript/lustre/lustre/element/svg.mjs
+var namespace = "http://www.w3.org/2000/svg";
+function path(attrs) {
+  return namespaced(namespace, "path", attrs, toList([]));
+}
+
+// build/dev/javascript/lustre_ui/lustre/ui/icon.mjs
+function icon(attrs, path2) {
+  return svg(
+    prepend(
+      class$("lustre-ui-icon"),
+      prepend(
+        attribute("viewBox", "0 0 15 15"),
+        prepend(attribute("fill", "none"), attrs)
+      )
+    ),
+    toList([
+      path(
+        toList([
+          attribute("d", path2),
+          attribute("fill", "currentColor"),
+          attribute("fill-rule", "evenodd"),
+          attribute("clip-rule", "evenodd")
+        ])
+      )
+    ])
+  );
+}
+function caret_left(attrs) {
+  return icon(
+    attrs,
+    "M8.81809 4.18179C8.99383 4.35753 8.99383 4.64245 8.81809 4.81819L6.13629 7.49999L8.81809 10.1818C8.99383 10.3575 8.99383 10.6424 8.81809 10.8182C8.64236 10.9939 8.35743 10.9939 8.1817 10.8182L5.1817 7.81819C5.09731 7.73379 5.0499 7.61933 5.0499 7.49999C5.0499 7.38064 5.09731 7.26618 5.1817 7.18179L8.1817 4.18179C8.35743 4.00605 8.64236 4.00605 8.81809 4.18179Z"
+  );
+}
+function caret_right(attrs) {
+  return icon(
+    attrs,
+    "M6.18194 4.18185C6.35767 4.00611 6.6426 4.00611 6.81833 4.18185L9.81833 7.18185C9.90272 7.26624 9.95013 7.3807 9.95013 7.50005C9.95013 7.6194 9.90272 7.73386 9.81833 7.81825L6.81833 10.8182C6.6426 10.994 6.35767 10.994 6.18194 10.8182C6.0062 10.6425 6.0062 10.3576 6.18194 10.1819L8.86374 7.50005L6.18194 4.81825C6.0062 4.64251 6.0062 4.35759 6.18194 4.18185Z"
+  );
+}
+function sketch_logo(attrs) {
+  return icon(
+    attrs,
+    "M7.53731 0.826873C7.5125 0.824392 7.4875 0.824392 7.46269 0.826873L3.96269 1.17687C3.85672 1.18747 3.76025 1.24262 3.69736 1.32857L0.699771 5.42528C0.654046 5.48627 0.62647 5.56165 0.625057 5.6434C0.625019 5.6456 0.625 5.64781 0.625 5.65001C0.625 5.65052 0.625001 5.65103 0.625003 5.65153C0.625363 5.74237 0.658021 5.82559 0.712087 5.8903L7.21042 13.7883C7.28165 13.8749 7.38789 13.925 7.5 13.925C7.61211 13.925 7.71835 13.8749 7.78958 13.7883L14.2879 5.89031C14.342 5.8256 14.3746 5.74237 14.375 5.65153C14.375 5.65103 14.375 5.65052 14.375 5.65001C14.375 5.64849 14.375 5.64697 14.375 5.64545C14.3749 5.63963 14.3747 5.63382 14.3744 5.62801C14.37 5.55219 14.3431 5.48242 14.3002 5.42527L11.3026 1.32857C11.2397 1.24262 11.1433 1.18747 11.0373 1.17687L7.53731 0.826873ZM10.925 5.27501V5.25236L10.9223 5.27501H10.925ZM10.9342 5.17498H13.1877L11.2495 2.5261L10.9342 5.17498ZM10.5707 1.88395L8.04432 1.63131L10.1747 5.21034L10.5707 1.88395ZM6.95568 1.63131L4.42931 1.88395L4.82531 5.21034L6.95568 1.63131ZM3.75046 2.5261L1.81226 5.17498H4.0658L3.75046 2.5261ZM1.79416 6.02501L6.75861 12.0587L4.22371 6.0669C4.21787 6.0531 4.21314 6.0391 4.20949 6.02501H1.79416ZM5.15055 6.02501L7.49999 12.1085L9.84943 6.02501H9.78681H5.21319H5.15055ZM10.7905 6.02501C10.7869 6.0391 10.7821 6.0531 10.7763 6.0669L8.24139 12.0587L13.2058 6.02501H10.7905ZM7.5 2.18317L9.34038 5.27501H5.65962L7.5 2.18317Z"
+  );
+}
+
 // build/dev/javascript/lustre_sandbox/lustre_sandbox/lib/msg.mjs
 var OnRouteChange = class extends CustomType {
   constructor(x0) {
@@ -3665,140 +3624,6 @@ function carousel(model, name, images) {
   );
 }
 
-// build/dev/javascript/lustre_sandbox/components/fizzbuzz.mjs
-function do_fizzbuzz(loop$num, loop$acc, loop$textlist) {
-  while (true) {
-    let num = loop$num;
-    let acc = loop$acc;
-    let textlist = loop$textlist;
-    if (acc === num + 1) {
-      let n = acc;
-      return textlist;
-    } else if (acc >= 0 && acc % 15 === 0 && acc > 30) {
-      let n = acc;
-      loop$num = num;
-      loop$acc = acc + 1;
-      loop$textlist = flatten(
-        toList([
-          textlist,
-          toList([
-            centre2(
-              toList([]),
-              p(
-                toList([text_5xl()]),
-                toList([
-                  text(
-                    "SUPER FIZZBUZZ TIMES " + to_string3(
-                      divideInt(n, 15) - 1
-                    ) + "!"
-                  )
-                ])
-              )
-            )
-          ])
-        ])
-      );
-    } else if (acc >= 0 && acc % 15 === 0 && acc > 15) {
-      let n = acc;
-      loop$num = num;
-      loop$acc = acc + 1;
-      loop$textlist = flatten(
-        toList([
-          textlist,
-          toList([
-            centre2(
-              toList([]),
-              p(
-                toList([text_3xl()]),
-                toList([text("SUPER FIZZBUZZ!")])
-              )
-            )
-          ])
-        ])
-      );
-    } else if (acc >= 0 && acc % 15 === 0) {
-      let n = acc;
-      loop$num = num;
-      loop$acc = acc + 1;
-      loop$textlist = flatten(
-        toList([
-          textlist,
-          toList([
-            centre2(
-              toList([]),
-              p(
-                toList([text_2xl()]),
-                toList([text("FIZZBUZZ!")])
-              )
-            )
-          ])
-        ])
-      );
-    } else if (acc >= 0 && acc % 3 === 0) {
-      let n = acc;
-      loop$num = num;
-      loop$acc = acc + 1;
-      loop$textlist = flatten(
-        toList([
-          textlist,
-          toList([div(toList([]), toList([text("fizz")]))])
-        ])
-      );
-    } else if (acc >= 0 && acc % 5 === 0) {
-      let n = acc;
-      loop$num = num;
-      loop$acc = acc + 1;
-      loop$textlist = flatten(
-        toList([
-          textlist,
-          toList([div(toList([]), toList([text("buzz")]))])
-        ])
-      );
-    } else if (acc >= 0) {
-      let n = acc;
-      loop$num = num;
-      loop$acc = acc + 1;
-      loop$textlist = flatten(
-        toList([
-          textlist,
-          toList([
-            div(toList([]), toList([text(to_string3(acc))]))
-          ])
-        ])
-      );
-    } else {
-      throw makeError(
-        "panic",
-        "components/fizzbuzz",
-        106,
-        "do_fizzbuzz",
-        "panic expression evaluated",
-        {}
-      );
-    }
-  }
-}
-function fizzbuzz(num) {
-  return toList([
-    centre2(
-      toList([inline()]),
-      div(
-        toList([
-          style(
-            toList([
-              ["display", "flex"],
-              ["align-items", "center"],
-              ["flex-wrap", "wrap"],
-              ["gap", "10px"]
-            ])
-          )
-        ]),
-        do_fizzbuzz(num, 1, toList([]))
-      )
-    )
-  ]);
-}
-
 // build/dev/javascript/lustre_sandbox/components/ints.mjs
 function message_handler2(model, intmsg) {
   if (intmsg instanceof IntIncrement) {
@@ -3843,6 +3668,72 @@ function message_handler2(model, intmsg) {
       none()
     ];
   }
+}
+
+// build/dev/javascript/lustre_ui/lustre/ui/classes.mjs
+function text_md() {
+  return class$("text-md");
+}
+function text_lg() {
+  return class$("text-lg");
+}
+function text_xl() {
+  return class$("text-xl");
+}
+function text_2xl() {
+  return class$("text-2xl");
+}
+function text_3xl() {
+  return class$("text-3xl");
+}
+function text_4xl() {
+  return class$("text-4xl");
+}
+function text_5xl() {
+  return class$("text-5xl");
+}
+function pb_lg() {
+  return class$("pb-lg");
+}
+function my_lg() {
+  return class$("my-lg");
+}
+function mt_md() {
+  return class$("mt-md");
+}
+function font_alt() {
+  return class$("font-alt");
+}
+function font_mono() {
+  return class$("font-mono");
+}
+function shadow_md() {
+  return class$("shadow-md");
+}
+
+// build/dev/javascript/lustre_sandbox/components/footer.mjs
+function footer(model) {
+  return div(
+    toList([
+      style(
+        toList([
+          ["height", "5rem"],
+          [
+            "background",
+            (() => {
+              let $ = get(model.state.inputs, "colour");
+              if ($.isOk() && $[0] === "red") {
+                return "#552222";
+              } else {
+                return "";
+              }
+            })()
+          ]
+        ])
+      )
+    ]),
+    toList([p(toList([]), toList([text("footer")]))])
+  );
 }
 
 // build/dev/javascript/lustre_sandbox/components/navbar.mjs
@@ -3998,6 +3889,140 @@ function input_box(model, name, placeholder2, attrs) {
       )
     );
   }
+}
+
+// build/dev/javascript/lustre_sandbox/components/fizzbuzz.mjs
+function do_fizzbuzz(loop$num, loop$acc, loop$textlist) {
+  while (true) {
+    let num = loop$num;
+    let acc = loop$acc;
+    let textlist = loop$textlist;
+    if (acc === num + 1) {
+      let n = acc;
+      return textlist;
+    } else if (acc >= 0 && acc % 15 === 0 && acc > 30) {
+      let n = acc;
+      loop$num = num;
+      loop$acc = acc + 1;
+      loop$textlist = flatten(
+        toList([
+          textlist,
+          toList([
+            centre2(
+              toList([]),
+              p(
+                toList([text_5xl()]),
+                toList([
+                  text(
+                    "SUPER FIZZBUZZ TIMES " + to_string3(
+                      divideInt(n, 15) - 1
+                    ) + "!"
+                  )
+                ])
+              )
+            )
+          ])
+        ])
+      );
+    } else if (acc >= 0 && acc % 15 === 0 && acc > 15) {
+      let n = acc;
+      loop$num = num;
+      loop$acc = acc + 1;
+      loop$textlist = flatten(
+        toList([
+          textlist,
+          toList([
+            centre2(
+              toList([]),
+              p(
+                toList([text_3xl()]),
+                toList([text("SUPER FIZZBUZZ!")])
+              )
+            )
+          ])
+        ])
+      );
+    } else if (acc >= 0 && acc % 15 === 0) {
+      let n = acc;
+      loop$num = num;
+      loop$acc = acc + 1;
+      loop$textlist = flatten(
+        toList([
+          textlist,
+          toList([
+            centre2(
+              toList([]),
+              p(
+                toList([text_2xl()]),
+                toList([text("FIZZBUZZ!")])
+              )
+            )
+          ])
+        ])
+      );
+    } else if (acc >= 0 && acc % 3 === 0) {
+      let n = acc;
+      loop$num = num;
+      loop$acc = acc + 1;
+      loop$textlist = flatten(
+        toList([
+          textlist,
+          toList([div(toList([]), toList([text("fizz")]))])
+        ])
+      );
+    } else if (acc >= 0 && acc % 5 === 0) {
+      let n = acc;
+      loop$num = num;
+      loop$acc = acc + 1;
+      loop$textlist = flatten(
+        toList([
+          textlist,
+          toList([div(toList([]), toList([text("buzz")]))])
+        ])
+      );
+    } else if (acc >= 0) {
+      let n = acc;
+      loop$num = num;
+      loop$acc = acc + 1;
+      loop$textlist = flatten(
+        toList([
+          textlist,
+          toList([
+            div(toList([]), toList([text(to_string3(acc))]))
+          ])
+        ])
+      );
+    } else {
+      throw makeError(
+        "panic",
+        "components/fizzbuzz",
+        106,
+        "do_fizzbuzz",
+        "panic expression evaluated",
+        {}
+      );
+    }
+  }
+}
+function fizzbuzz(num) {
+  return toList([
+    centre2(
+      toList([inline()]),
+      div(
+        toList([
+          style(
+            toList([
+              ["display", "flex"],
+              ["align-items", "center"],
+              ["flex-wrap", "wrap"],
+              ["gap", "10px"]
+            ])
+          )
+        ]),
+        do_fizzbuzz(num, 1, toList([]))
+      )
+    )
+  ]);
 }
 
 // build/dev/javascript/lustre_sandbox/pages/about.mjs
@@ -4161,6 +4186,98 @@ function index2(model) {
   );
 }
 
+// build/dev/javascript/lustre_sandbox/pages/app.mjs
+function app(model) {
+  return div(
+    toList([]),
+    toList([
+      navbar(model),
+      div(
+        toList([
+          style(
+            toList([
+              ["width", "full"],
+              ["margin", "0 auto"],
+              ["padding", "2rem"],
+              [
+                "background",
+                unwrap(get(model.state.inputs, "colour"), "")
+              ]
+            ])
+          )
+        ]),
+        toList([
+          (() => {
+            let $ = model.state.route;
+            if ($ instanceof Index) {
+              return index2(model);
+            } else {
+              return about(model);
+            }
+          })()
+        ])
+      ),
+      div(
+        toList([
+          (() => {
+            let $ = get(model.state.inputs, "colour");
+            if ($.isOk() && $[0] === "red") {
+              return style(toList([["background", "#882222"]]));
+            } else {
+              return none2();
+            }
+          })()
+        ]),
+        toList([carousel(model, "test", model.state.images)])
+      ),
+      centre2(
+        toList([]),
+        div(
+          toList([]),
+          toList([
+            div(
+              toList([]),
+              toList([
+                input_box(
+                  model,
+                  "image_input",
+                  "[image_input]",
+                  toList([
+                    text_2xl(),
+                    style(toList([["width", "full"]])),
+                    primary()
+                  ])
+                )
+              ])
+            ),
+            div(
+              toList([]),
+              toList([
+                (() => {
+                  let $ = get(model.state.inputs, "image_input");
+                  if ($.isOk() && $[0] === "") {
+                    return none3();
+                  } else if ($.isOk()) {
+                    let img2 = $[0];
+                    return imageloader(
+                      to_imageref("input_image", img2),
+                      500,
+                      600
+                    );
+                  } else {
+                    return none3();
+                  }
+                })()
+              ])
+            )
+          ])
+        )
+      ),
+      footer(model)
+    ])
+  );
+}
+
 // build/dev/javascript/lustre_sandbox/lustre_sandbox.mjs
 function initial_state() {
   let test_image = new ImageRef(
@@ -4252,33 +4369,7 @@ function update(model, msg) {
     return message_handler(model, carouselmsg);
   }
 }
-function footer(model) {
-  return div(
-    toList([
-      style(
-        toList([
-          ["height", "5rem"],
-          [
-            "background",
-            (() => {
-              let $ = get(model.state.inputs, "colour");
-              if ($.isOk() && $[0] === "red") {
-                return "#552222";
-              } else {
-                return "";
-              }
-            })()
-          ]
-        ])
-      )
-    ]),
-    toList([p(toList([]), toList([text("footer")]))])
-  );
-}
 function view(model) {
-  let custom_styles = style(
-    toList([["width", "full"], ["margin", "0 auto"], ["padding", "2rem"]])
-  );
   return div(
     toList([]),
     toList([
@@ -4287,110 +4378,20 @@ function view(model) {
         toList([
           theme(model.state.theme),
           elements2(),
-          div(
-            toList([]),
-            toList([
-              navbar(model),
-              div(
-                toList([
-                  custom_styles,
-                  style(
-                    toList([
-                      [
-                        "background",
-                        unwrap(
-                          get(model.state.inputs, "colour"),
-                          ""
-                        )
-                      ]
-                    ])
-                  )
-                ]),
-                toList([
-                  (() => {
-                    let $ = model.state.route;
-                    if ($ instanceof Index) {
-                      return index2(model);
-                    } else {
-                      return about(model);
-                    }
-                  })()
-                ])
-              ),
-              div(
-                toList([
-                  (() => {
-                    let $ = get(model.state.inputs, "colour");
-                    if ($.isOk() && $[0] === "red") {
-                      return style(
-                        toList([["background", "#882222"]])
-                      );
-                    } else {
-                      return none2();
-                    }
-                  })()
-                ]),
-                toList([carousel(model, "test", model.state.images)])
-              ),
-              centre2(
-                toList([]),
-                div(
-                  toList([]),
-                  toList([
-                    div(
-                      toList([]),
-                      toList([
-                        input_box(
-                          model,
-                          "image_input",
-                          "[image_input]",
-                          toList([
-                            text_2xl(),
-                            style(toList([["width", "full"]])),
-                            primary()
-                          ])
-                        )
-                      ])
-                    ),
-                    div(
-                      toList([]),
-                      toList([
-                        (() => {
-                          let $ = get(model.state.inputs, "image_input");
-                          if ($.isOk() && $[0] === "") {
-                            return none3();
-                          } else if ($.isOk()) {
-                            let img2 = $[0];
-                            return imageloader(
-                              to_imageref("input_image", img2),
-                              500,
-                              600
-                            );
-                          } else {
-                            return none3();
-                          }
-                        })()
-                      ])
-                    )
-                  ])
-                )
-              ),
-              footer(model)
-            ])
-          )
+          app(model)
         ])
       )
     ])
   );
 }
 function main() {
-  let app = application(init3, update, view);
-  let $ = start2(app, "#app", void 0);
+  let app2 = application(init3, update, view);
+  let $ = start2(app2, "#app", void 0);
   if (!$.isOk()) {
     throw makeError(
       "assignment_no_match",
       "lustre_sandbox",
-      37,
+      25,
       "main",
       "Assignment pattern did not match",
       { value: $ }
