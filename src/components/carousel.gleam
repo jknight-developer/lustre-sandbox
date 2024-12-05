@@ -3,6 +3,7 @@ import lustre/attribute
 import lustre/effect
 import lustre/element.{type Element}
 import lustre/element/html
+
 // import lustre/event
 import lustre/ui/icon
 import lustre_sandbox/lib/msg.{type CarouselMsg, type Msg}
