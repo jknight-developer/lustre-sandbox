@@ -3686,6 +3686,140 @@ function carousel(model, name, images) {
   );
 }
 
+// build/dev/javascript/lustre_sandbox/components/fizzbuzz.mjs
+function do_fizzbuzz(loop$num, loop$acc, loop$textlist) {
+  while (true) {
+    let num = loop$num;
+    let acc = loop$acc;
+    let textlist = loop$textlist;
+    if (acc === num + 1) {
+      let n = acc;
+      return textlist;
+    } else if (acc >= 0 && acc % 15 === 0 && acc > 30) {
+      let n = acc;
+      loop$num = num;
+      loop$acc = acc + 1;
+      loop$textlist = flatten(
+        toList([
+          textlist,
+          toList([
+            centre2(
+              toList([]),
+              p(
+                toList([text_5xl()]),
+                toList([
+                  text(
+                    "SUPER FIZZBUZZ TIMES " + to_string3(
+                      divideInt(n, 15) - 1
+                    ) + "!"
+                  )
+                ])
+              )
+            )
+          ])
+        ])
+      );
+    } else if (acc >= 0 && acc % 15 === 0 && acc > 15) {
+      let n = acc;
+      loop$num = num;
+      loop$acc = acc + 1;
+      loop$textlist = flatten(
+        toList([
+          textlist,
+          toList([
+            centre2(
+              toList([]),
+              p(
+                toList([text_3xl()]),
+                toList([text("SUPER FIZZBUZZ!")])
+              )
+            )
+          ])
+        ])
+      );
+    } else if (acc >= 0 && acc % 15 === 0) {
+      let n = acc;
+      loop$num = num;
+      loop$acc = acc + 1;
+      loop$textlist = flatten(
+        toList([
+          textlist,
+          toList([
+            centre2(
+              toList([]),
+              p(
+                toList([text_2xl()]),
+                toList([text("FIZZBUZZ!")])
+              )
+            )
+          ])
+        ])
+      );
+    } else if (acc >= 0 && acc % 3 === 0) {
+      let n = acc;
+      loop$num = num;
+      loop$acc = acc + 1;
+      loop$textlist = flatten(
+        toList([
+          textlist,
+          toList([div(toList([]), toList([text("fizz")]))])
+        ])
+      );
+    } else if (acc >= 0 && acc % 5 === 0) {
+      let n = acc;
+      loop$num = num;
+      loop$acc = acc + 1;
+      loop$textlist = flatten(
+        toList([
+          textlist,
+          toList([div(toList([]), toList([text("buzz")]))])
+        ])
+      );
+    } else if (acc >= 0) {
+      let n = acc;
+      loop$num = num;
+      loop$acc = acc + 1;
+      loop$textlist = flatten(
+        toList([
+          textlist,
+          toList([
+            div(toList([]), toList([text(to_string3(acc))]))
+          ])
+        ])
+      );
+    } else {
+      throw makeError(
+        "panic",
+        "components/fizzbuzz",
+        24,
+        "do_fizzbuzz",
+        "panic expression evaluated",
+        {}
+      );
+    }
+  }
+}
+function fizzbuzz(num) {
+  return toList([
+    centre2(
+      toList([inline()]),
+      div(
+        toList([
+          style(
+            toList([
+              ["display", "flex"],
+              ["align-items", "center"],
+              ["flex-wrap", "wrap"],
+              ["gap", "10px"]
+            ])
+          )
+        ]),
+        do_fizzbuzz(num, 1, toList([]))
+      )
+    )
+  ]);
+}
+
 // build/dev/javascript/lustre_sandbox/components/ints.mjs
 function message_handler2(model, intmsg) {
   if (intmsg instanceof IntIncrement) {
@@ -3885,138 +4019,6 @@ function navbar(model) {
       hr(toList([style(toList([["opacity", "0"]]))]))
     ])
   );
-}
-function do_fizzbuzz(loop$num, loop$acc, loop$textlist) {
-  while (true) {
-    let num = loop$num;
-    let acc = loop$acc;
-    let textlist = loop$textlist;
-    if (acc === num + 1) {
-      let n = acc;
-      return textlist;
-    } else if (acc >= 0 && acc % 15 === 0 && acc > 30) {
-      let n = acc;
-      loop$num = num;
-      loop$acc = acc + 1;
-      loop$textlist = flatten(
-        toList([
-          textlist,
-          toList([
-            centre2(
-              toList([]),
-              p(
-                toList([text_5xl()]),
-                toList([
-                  text(
-                    "SUPER FIZZBUZZ TIMES " + to_string3(
-                      divideInt(n, 15) - 1
-                    ) + "!"
-                  )
-                ])
-              )
-            )
-          ])
-        ])
-      );
-    } else if (acc >= 0 && acc % 15 === 0 && acc > 15) {
-      let n = acc;
-      loop$num = num;
-      loop$acc = acc + 1;
-      loop$textlist = flatten(
-        toList([
-          textlist,
-          toList([
-            centre2(
-              toList([]),
-              p(
-                toList([text_3xl()]),
-                toList([text("SUPER FIZZBUZZ!")])
-              )
-            )
-          ])
-        ])
-      );
-    } else if (acc >= 0 && acc % 15 === 0) {
-      let n = acc;
-      loop$num = num;
-      loop$acc = acc + 1;
-      loop$textlist = flatten(
-        toList([
-          textlist,
-          toList([
-            centre2(
-              toList([]),
-              p(
-                toList([text_2xl()]),
-                toList([text("FIZZBUZZ!")])
-              )
-            )
-          ])
-        ])
-      );
-    } else if (acc >= 0 && acc % 3 === 0) {
-      let n = acc;
-      loop$num = num;
-      loop$acc = acc + 1;
-      loop$textlist = flatten(
-        toList([
-          textlist,
-          toList([div(toList([]), toList([text("fizz")]))])
-        ])
-      );
-    } else if (acc >= 0 && acc % 5 === 0) {
-      let n = acc;
-      loop$num = num;
-      loop$acc = acc + 1;
-      loop$textlist = flatten(
-        toList([
-          textlist,
-          toList([div(toList([]), toList([text("buzz")]))])
-        ])
-      );
-    } else if (acc >= 0) {
-      let n = acc;
-      loop$num = num;
-      loop$acc = acc + 1;
-      loop$textlist = flatten(
-        toList([
-          textlist,
-          toList([
-            div(toList([]), toList([text(to_string3(acc))]))
-          ])
-        ])
-      );
-    } else {
-      throw makeError(
-        "panic",
-        "lustre_sandbox",
-        183,
-        "do_fizzbuzz",
-        "panic expression evaluated",
-        {}
-      );
-    }
-  }
-}
-function fizzbuzz(num) {
-  return toList([
-    centre2(
-      toList([inline()]),
-      div(
-        toList([
-          style(
-            toList([
-              ["display", "flex"],
-              ["align-items", "center"],
-              ["flex-wrap", "wrap"],
-              ["gap", "10px"]
-            ])
-          )
-        ]),
-        do_fizzbuzz(num, 1, toList([]))
-      )
-    )
-  ]);
 }
 function do_element_clones(loop$amount, loop$element, loop$acc) {
   while (true) {
@@ -4222,7 +4224,9 @@ function about(model) {
             toList([["display", "flex"], ["justify-content", "center"]])
           )
         ]),
-        fizzbuzz(unwrap(get(model.state.ints, "fizzbuzz"), 10))
+        fizzbuzz(
+          unwrap(get(model.state.ints, "fizzbuzz"), 10)
+        )
       )
     ])
   );
@@ -4375,7 +4379,7 @@ function main() {
     throw makeError(
       "assignment_no_match",
       "lustre_sandbox",
-      33,
+      34,
       "main",
       "Assignment pattern did not match",
       { value: $ }
