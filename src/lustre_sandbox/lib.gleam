@@ -1,12 +1,21 @@
 import gleam/dict
 import gleam/list
 import lustre/attribute.{type Attribute}
+import lustre/effect.{type Effect}
 import lustre/element.{type Element}
 import lustre/element/html
 import lustre/event
 import lustre/ui
 import lustre_sandbox/lib/msg.{type Msg}
 import lustre_sandbox/lib/types.{type ImageRef, type Model, ImageRef}
+import plinth/javascript/global
+
+pub fn set_interval(interval: Int, msg: Msg) -> Effect(Msg) {
+  effect.from(fn(dispatch) {
+    global.set_interval(interval, fn() { dispatch(msg) })
+    Nil
+  })
+}
 
 pub fn to_imageref(title: String, location: String) -> ImageRef {
   ImageRef(title, location)

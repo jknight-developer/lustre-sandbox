@@ -129,7 +129,7 @@ pub fn index(model: Model) -> Element(Msg) {
           _ -> attribute.none()
         },
       ],
-      [carousel.carousel(model, "test", model.state.images)],
+      [carousel.carousel(model, "test")],
     ),
     html.div(
       [

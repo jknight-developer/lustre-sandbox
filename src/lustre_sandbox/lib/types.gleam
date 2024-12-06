@@ -21,4 +21,6 @@ pub type ImageRef {
   ImageRef(title: String, location: String)
 }
 
-pub type CarouselState
+pub type CarouselState {
+  CarouselState(index: Int, images: List(ImageRef), autoslide: #(Bool, Int))
+}

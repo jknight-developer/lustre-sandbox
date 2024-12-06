@@ -14,6 +14,7 @@ import plinth/javascript/global
 
 import components/carousel
 import components/ints
+import lustre_sandbox/lib
 import lustre_sandbox/lib/msg.{type Msg}
 import lustre_sandbox/lib/types.{
   type ImageRef, type Model, type State, ImageRef, Model, State,
@@ -57,7 +58,7 @@ pub fn initial_state() {
     inputs: dict.new(),
     images: images,
     ints: dict.from_list([#("icons", 5), #("fizzbuzz", 10)]),
-    carousels: dict.new(),
+    carousels: dict.from_list([#("test", types.CarouselState(0, images, #(True, 5000)))]),
   )
 }
 
@@ -66,16 +67,9 @@ fn init(_) -> #(Model, Effect(Msg)) {
     Model(initial_state()),
     effect.batch([
       modem.init(on_url_change),
-      set_interval(1000, msg.IntMessage(msg.IntIncrement("fizzbuzz"))),
+      lib.set_interval(1000, msg.IntMessage(msg.IntIncrement("fizzbuzz"))),
     ]),
   )
-}
-
-fn set_interval(interval: Int, msg: Msg) -> Effect(Msg) {
-  effect.from(fn(dispatch) {
-    global.set_interval(interval, fn() { dispatch(msg) })
-    Nil
-  })
 }
 
 fn on_url_change(uri: Uri) -> Msg {

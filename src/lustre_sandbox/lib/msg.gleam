@@ -14,9 +14,9 @@ pub type Route {
 pub type CarouselMsg {
   NextSlide(String)
   PreviousSlide(String)
-  GotoSlide(String, Int)
+  SetSlide(String, Int)
   StartAutoSlide(String, Int)
-  PauseAutoSlide(String, Int)
+  PauseAutoSlide(String)
 }
 
 pub type IntMsg {

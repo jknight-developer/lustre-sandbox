@@ -271,6 +271,14 @@ function to_result(option, e) {
   }
 }
 
+// build/dev/javascript/gleam_stdlib/gleam/order.mjs
+var Lt = class extends CustomType {
+};
+var Eq = class extends CustomType {
+};
+var Gt = class extends CustomType {
+};
+
 // build/dev/javascript/gleam_stdlib/gleam/float.mjs
 function to_string(x) {
   return float_to_string(x);
@@ -308,8 +316,37 @@ function to_string3(x) {
 function to_float(x) {
   return identity(x);
 }
+function compare(a2, b) {
+  let $ = a2 === b;
+  if ($) {
+    return new Eq();
+  } else {
+    let $1 = a2 < b;
+    if ($1) {
+      return new Lt();
+    } else {
+      return new Gt();
+    }
+  }
+}
 
 // build/dev/javascript/gleam_stdlib/gleam/list.mjs
+function length_loop(loop$list, loop$count) {
+  while (true) {
+    let list = loop$list;
+    let count = loop$count;
+    if (list.atLeastLength(1)) {
+      let list$1 = list.tail;
+      loop$list = list$1;
+      loop$count = count + 1;
+    } else {
+      return count;
+    }
+  }
+}
+function length(list) {
+  return length_loop(list, 0);
+}
 function reverse_loop(loop$remaining, loop$accumulator) {
   while (true) {
     let remaining = loop$remaining;
@@ -431,6 +468,28 @@ function index_fold_loop(loop$over, loop$acc, loop$with, loop$index) {
 function index_fold(list, initial, fun) {
   return index_fold_loop(list, initial, fun, 0);
 }
+function range_loop(loop$start, loop$stop, loop$acc) {
+  while (true) {
+    let start3 = loop$start;
+    let stop = loop$stop;
+    let acc = loop$acc;
+    let $ = compare(start3, stop);
+    if ($ instanceof Eq) {
+      return prepend(stop, acc);
+    } else if ($ instanceof Gt) {
+      loop$start = start3;
+      loop$stop = stop + 1;
+      loop$acc = prepend(stop, acc);
+    } else {
+      loop$start = start3;
+      loop$stop = stop - 1;
+      loop$acc = prepend(stop, acc);
+    }
+  }
+}
+function range(start3, stop) {
+  return range_loop(start3, stop, toList([]));
+}
 
 // build/dev/javascript/gleam_stdlib/gleam/string_tree.mjs
 function from_strings(strings) {
@@ -447,7 +506,7 @@ function split2(tree, pattern) {
 }
 
 // build/dev/javascript/gleam_stdlib/gleam/string.mjs
-function length2(string3) {
+function length3(string3) {
   return string_length(string3);
 }
 function replace(string3, pattern, substitute) {
@@ -463,7 +522,7 @@ function slice(string3, idx, len) {
   } else {
     let $1 = idx < 0;
     if ($1) {
-      let translated_idx = length2(string3) + idx;
+      let translated_idx = length3(string3) + idx;
       let $2 = translated_idx < 0;
       if ($2) {
         return "";
@@ -480,7 +539,7 @@ function drop_start(string3, num_graphemes) {
   if ($) {
     return string3;
   } else {
-    return slice(string3, num_graphemes, length2(string3) - num_graphemes);
+    return slice(string3, num_graphemes, length3(string3) - num_graphemes);
   }
 }
 function join2(strings, separator) {
@@ -3426,255 +3485,6 @@ function setInterval(delay, callback) {
   return globalThis.setInterval(callback, delay);
 }
 
-// build/dev/javascript/lustre/lustre/element/svg.mjs
-var namespace = "http://www.w3.org/2000/svg";
-function path(attrs) {
-  return namespaced(namespace, "path", attrs, toList([]));
-}
-
-// build/dev/javascript/lustre_ui/lustre/ui/icon.mjs
-function icon(attrs, path2) {
-  return svg(
-    prepend(
-      class$("lustre-ui-icon"),
-      prepend(
-        attribute("viewBox", "0 0 15 15"),
-        prepend(attribute("fill", "none"), attrs)
-      )
-    ),
-    toList([
-      path(
-        toList([
-          attribute("d", path2),
-          attribute("fill", "currentColor"),
-          attribute("fill-rule", "evenodd"),
-          attribute("clip-rule", "evenodd")
-        ])
-      )
-    ])
-  );
-}
-function caret_left(attrs) {
-  return icon(
-    attrs,
-    "M8.81809 4.18179C8.99383 4.35753 8.99383 4.64245 8.81809 4.81819L6.13629 7.49999L8.81809 10.1818C8.99383 10.3575 8.99383 10.6424 8.81809 10.8182C8.64236 10.9939 8.35743 10.9939 8.1817 10.8182L5.1817 7.81819C5.09731 7.73379 5.0499 7.61933 5.0499 7.49999C5.0499 7.38064 5.09731 7.26618 5.1817 7.18179L8.1817 4.18179C8.35743 4.00605 8.64236 4.00605 8.81809 4.18179Z"
-  );
-}
-function caret_right(attrs) {
-  return icon(
-    attrs,
-    "M6.18194 4.18185C6.35767 4.00611 6.6426 4.00611 6.81833 4.18185L9.81833 7.18185C9.90272 7.26624 9.95013 7.3807 9.95013 7.50005C9.95013 7.6194 9.90272 7.73386 9.81833 7.81825L6.81833 10.8182C6.6426 10.994 6.35767 10.994 6.18194 10.8182C6.0062 10.6425 6.0062 10.3576 6.18194 10.1819L8.86374 7.50005L6.18194 4.81825C6.0062 4.64251 6.0062 4.35759 6.18194 4.18185Z"
-  );
-}
-function sketch_logo(attrs) {
-  return icon(
-    attrs,
-    "M7.53731 0.826873C7.5125 0.824392 7.4875 0.824392 7.46269 0.826873L3.96269 1.17687C3.85672 1.18747 3.76025 1.24262 3.69736 1.32857L0.699771 5.42528C0.654046 5.48627 0.62647 5.56165 0.625057 5.6434C0.625019 5.6456 0.625 5.64781 0.625 5.65001C0.625 5.65052 0.625001 5.65103 0.625003 5.65153C0.625363 5.74237 0.658021 5.82559 0.712087 5.8903L7.21042 13.7883C7.28165 13.8749 7.38789 13.925 7.5 13.925C7.61211 13.925 7.71835 13.8749 7.78958 13.7883L14.2879 5.89031C14.342 5.8256 14.3746 5.74237 14.375 5.65153C14.375 5.65103 14.375 5.65052 14.375 5.65001C14.375 5.64849 14.375 5.64697 14.375 5.64545C14.3749 5.63963 14.3747 5.63382 14.3744 5.62801C14.37 5.55219 14.3431 5.48242 14.3002 5.42527L11.3026 1.32857C11.2397 1.24262 11.1433 1.18747 11.0373 1.17687L7.53731 0.826873ZM10.925 5.27501V5.25236L10.9223 5.27501H10.925ZM10.9342 5.17498H13.1877L11.2495 2.5261L10.9342 5.17498ZM10.5707 1.88395L8.04432 1.63131L10.1747 5.21034L10.5707 1.88395ZM6.95568 1.63131L4.42931 1.88395L4.82531 5.21034L6.95568 1.63131ZM3.75046 2.5261L1.81226 5.17498H4.0658L3.75046 2.5261ZM1.79416 6.02501L6.75861 12.0587L4.22371 6.0669C4.21787 6.0531 4.21314 6.0391 4.20949 6.02501H1.79416ZM5.15055 6.02501L7.49999 12.1085L9.84943 6.02501H9.78681H5.21319H5.15055ZM10.7905 6.02501C10.7869 6.0391 10.7821 6.0531 10.7763 6.0669L8.24139 12.0587L13.2058 6.02501H10.7905ZM7.5 2.18317L9.34038 5.27501H5.65962L7.5 2.18317Z"
-  );
-}
-
-// build/dev/javascript/lustre_sandbox/lustre_sandbox/lib/msg.mjs
-var OnRouteChange = class extends CustomType {
-  constructor(x0) {
-    super();
-    this[0] = x0;
-  }
-};
-var StateReset = class extends CustomType {
-};
-var InputUpdate = class extends CustomType {
-  constructor(x0, x1) {
-    super();
-    this[0] = x0;
-    this[1] = x1;
-  }
-};
-var IntMessage = class extends CustomType {
-  constructor(x0) {
-    super();
-    this[0] = x0;
-  }
-};
-var Index = class extends CustomType {
-};
-var About = class extends CustomType {
-};
-var IntIncrement = class extends CustomType {
-  constructor(x0) {
-    super();
-    this[0] = x0;
-  }
-};
-var IntDecrement = class extends CustomType {
-  constructor(x0) {
-    super();
-    this[0] = x0;
-  }
-};
-
-// build/dev/javascript/lustre_sandbox/lustre_sandbox/lib/types.mjs
-var Model2 = class extends CustomType {
-  constructor(state) {
-    super();
-    this.state = state;
-  }
-};
-var State = class extends CustomType {
-  constructor(route, theme2, images, inputs, ints, carousels) {
-    super();
-    this.route = route;
-    this.theme = theme2;
-    this.images = images;
-    this.inputs = inputs;
-    this.ints = ints;
-    this.carousels = carousels;
-  }
-};
-var ImageRef = class extends CustomType {
-  constructor(title, location) {
-    super();
-    this.title = title;
-    this.location = location;
-  }
-};
-
-// build/dev/javascript/lustre_sandbox/components/carousel.mjs
-function message_handler(model, carouselmsg) {
-  {
-    return [model, none()];
-  }
-}
-function carousel(_, _1, images) {
-  let carousel_wrapper = style(
-    toList([
-      ["position", "relative"],
-      ["width", "80%"],
-      ["max_width", "800px"],
-      ["max-height", "600px"],
-      ["margin", "0 auto"],
-      ["overflow", "hidden"]
-    ])
-  );
-  let carousel_element = style(
-    toList([["display", "flex"], ["transition", "transform 0.5s ease-in-out"]])
-  );
-  let carousel_button = style(
-    toList([
-      ["position", "absolute"],
-      ["top", "50%"],
-      ["transform", "translateY(-50%)"],
-      ["background-color", "rgba(0, 0, 0, 0.5)"],
-      ["color", "white"],
-      ["border", "none"],
-      ["padding", "10px 20px"],
-      ["cursor", "pointer"],
-      ["z-index", "1"]
-    ])
-  );
-  return div(
-    toList([carousel_wrapper]),
-    toList([
-      div(
-        toList([carousel_element]),
-        map(
-          images,
-          (image) => {
-            return img(
-              toList([
-                src(image.location),
-                alt(image.title),
-                style(
-                  toList([["width", "100%"], ["flex-shrink", "0"]])
-                )
-              ])
-            );
-          }
-        )
-      ),
-      button(
-        toList([carousel_button, style(toList([["left", "10px"]]))]),
-        toList([caret_left(toList([]))])
-      ),
-      button(
-        toList([carousel_button, style(toList([["right", "10px"]]))]),
-        toList([caret_right(toList([]))])
-      ),
-      div(toList([]), toList([]))
-    ])
-  );
-}
-
-// build/dev/javascript/lustre_sandbox/components/ints.mjs
-function message_handler2(model, intmsg) {
-  if (intmsg instanceof IntIncrement) {
-    let name = intmsg[0];
-    return [
-      new Model2(
-        model.state.withFields({
-          ints: map_values(
-            model.state.ints,
-            (k, v) => {
-              if (k === name) {
-                let n = k;
-                return v + 1;
-              } else {
-                return v;
-              }
-            }
-          )
-        })
-      ),
-      none()
-    ];
-  } else {
-    let name = intmsg[0];
-    return [
-      new Model2(
-        model.state.withFields({
-          ints: map_values(
-            model.state.ints,
-            (k, v) => {
-              if (k === name && v > 0) {
-                let n = k;
-                let i = v;
-                return v - 1;
-              } else {
-                return v;
-              }
-            }
-          )
-        })
-      ),
-      none()
-    ];
-  }
-}
-
-// build/dev/javascript/lustre_sandbox/components/footer.mjs
-function footer(model) {
-  return div(
-    toList([
-      style(
-        toList([
-          ["height", "5rem"],
-          [
-            "background",
-            (() => {
-              let $ = get(model.state.inputs, "colour");
-              if ($.isOk() && $[0] === "red") {
-                return "#552222";
-              } else {
-                return "";
-              }
-            })()
-          ]
-        ])
-      )
-    ]),
-    toList([p(toList([]), toList([text("footer")]))])
-  );
-}
-
 // build/dev/javascript/lustre/lustre/event.mjs
 function on2(name, handler) {
   return on(name, handler);
@@ -3757,6 +3567,587 @@ function font_mono() {
 }
 function shadow_md() {
   return class$("shadow-md");
+}
+
+// build/dev/javascript/lustre/lustre/element/svg.mjs
+var namespace = "http://www.w3.org/2000/svg";
+function path(attrs) {
+  return namespaced(namespace, "path", attrs, toList([]));
+}
+
+// build/dev/javascript/lustre_ui/lustre/ui/icon.mjs
+function icon(attrs, path2) {
+  return svg(
+    prepend(
+      class$("lustre-ui-icon"),
+      prepend(
+        attribute("viewBox", "0 0 15 15"),
+        prepend(attribute("fill", "none"), attrs)
+      )
+    ),
+    toList([
+      path(
+        toList([
+          attribute("d", path2),
+          attribute("fill", "currentColor"),
+          attribute("fill-rule", "evenodd"),
+          attribute("clip-rule", "evenodd")
+        ])
+      )
+    ])
+  );
+}
+function caret_left(attrs) {
+  return icon(
+    attrs,
+    "M8.81809 4.18179C8.99383 4.35753 8.99383 4.64245 8.81809 4.81819L6.13629 7.49999L8.81809 10.1818C8.99383 10.3575 8.99383 10.6424 8.81809 10.8182C8.64236 10.9939 8.35743 10.9939 8.1817 10.8182L5.1817 7.81819C5.09731 7.73379 5.0499 7.61933 5.0499 7.49999C5.0499 7.38064 5.09731 7.26618 5.1817 7.18179L8.1817 4.18179C8.35743 4.00605 8.64236 4.00605 8.81809 4.18179Z"
+  );
+}
+function caret_right(attrs) {
+  return icon(
+    attrs,
+    "M6.18194 4.18185C6.35767 4.00611 6.6426 4.00611 6.81833 4.18185L9.81833 7.18185C9.90272 7.26624 9.95013 7.3807 9.95013 7.50005C9.95013 7.6194 9.90272 7.73386 9.81833 7.81825L6.81833 10.8182C6.6426 10.994 6.35767 10.994 6.18194 10.8182C6.0062 10.6425 6.0062 10.3576 6.18194 10.1819L8.86374 7.50005L6.18194 4.81825C6.0062 4.64251 6.0062 4.35759 6.18194 4.18185Z"
+  );
+}
+function sketch_logo(attrs) {
+  return icon(
+    attrs,
+    "M7.53731 0.826873C7.5125 0.824392 7.4875 0.824392 7.46269 0.826873L3.96269 1.17687C3.85672 1.18747 3.76025 1.24262 3.69736 1.32857L0.699771 5.42528C0.654046 5.48627 0.62647 5.56165 0.625057 5.6434C0.625019 5.6456 0.625 5.64781 0.625 5.65001C0.625 5.65052 0.625001 5.65103 0.625003 5.65153C0.625363 5.74237 0.658021 5.82559 0.712087 5.8903L7.21042 13.7883C7.28165 13.8749 7.38789 13.925 7.5 13.925C7.61211 13.925 7.71835 13.8749 7.78958 13.7883L14.2879 5.89031C14.342 5.8256 14.3746 5.74237 14.375 5.65153C14.375 5.65103 14.375 5.65052 14.375 5.65001C14.375 5.64849 14.375 5.64697 14.375 5.64545C14.3749 5.63963 14.3747 5.63382 14.3744 5.62801C14.37 5.55219 14.3431 5.48242 14.3002 5.42527L11.3026 1.32857C11.2397 1.24262 11.1433 1.18747 11.0373 1.17687L7.53731 0.826873ZM10.925 5.27501V5.25236L10.9223 5.27501H10.925ZM10.9342 5.17498H13.1877L11.2495 2.5261L10.9342 5.17498ZM10.5707 1.88395L8.04432 1.63131L10.1747 5.21034L10.5707 1.88395ZM6.95568 1.63131L4.42931 1.88395L4.82531 5.21034L6.95568 1.63131ZM3.75046 2.5261L1.81226 5.17498H4.0658L3.75046 2.5261ZM1.79416 6.02501L6.75861 12.0587L4.22371 6.0669C4.21787 6.0531 4.21314 6.0391 4.20949 6.02501H1.79416ZM5.15055 6.02501L7.49999 12.1085L9.84943 6.02501H9.78681H5.21319H5.15055ZM10.7905 6.02501C10.7869 6.0391 10.7821 6.0531 10.7763 6.0669L8.24139 12.0587L13.2058 6.02501H10.7905ZM7.5 2.18317L9.34038 5.27501H5.65962L7.5 2.18317Z"
+  );
+}
+
+// build/dev/javascript/lustre_sandbox/lustre_sandbox/lib/msg.mjs
+var OnRouteChange = class extends CustomType {
+  constructor(x0) {
+    super();
+    this[0] = x0;
+  }
+};
+var StateReset = class extends CustomType {
+};
+var InputUpdate = class extends CustomType {
+  constructor(x0, x1) {
+    super();
+    this[0] = x0;
+    this[1] = x1;
+  }
+};
+var IntMessage = class extends CustomType {
+  constructor(x0) {
+    super();
+    this[0] = x0;
+  }
+};
+var CarouselMessage = class extends CustomType {
+  constructor(x0) {
+    super();
+    this[0] = x0;
+  }
+};
+var Index = class extends CustomType {
+};
+var About = class extends CustomType {
+};
+var NextSlide = class extends CustomType {
+  constructor(x0) {
+    super();
+    this[0] = x0;
+  }
+};
+var PreviousSlide = class extends CustomType {
+  constructor(x0) {
+    super();
+    this[0] = x0;
+  }
+};
+var SetSlide = class extends CustomType {
+  constructor(x0, x1) {
+    super();
+    this[0] = x0;
+    this[1] = x1;
+  }
+};
+var StartAutoSlide = class extends CustomType {
+  constructor(x0, x1) {
+    super();
+    this[0] = x0;
+    this[1] = x1;
+  }
+};
+var IntIncrement = class extends CustomType {
+  constructor(x0) {
+    super();
+    this[0] = x0;
+  }
+};
+var IntDecrement = class extends CustomType {
+  constructor(x0) {
+    super();
+    this[0] = x0;
+  }
+};
+
+// build/dev/javascript/lustre_sandbox/lustre_sandbox/lib/types.mjs
+var Model2 = class extends CustomType {
+  constructor(state) {
+    super();
+    this.state = state;
+  }
+};
+var State = class extends CustomType {
+  constructor(route, theme2, images, inputs, ints, carousels) {
+    super();
+    this.route = route;
+    this.theme = theme2;
+    this.images = images;
+    this.inputs = inputs;
+    this.ints = ints;
+    this.carousels = carousels;
+  }
+};
+var ImageRef = class extends CustomType {
+  constructor(title, location) {
+    super();
+    this.title = title;
+    this.location = location;
+  }
+};
+var CarouselState = class extends CustomType {
+  constructor(index3, images, autoslide) {
+    super();
+    this.index = index3;
+    this.images = images;
+    this.autoslide = autoslide;
+  }
+};
+
+// build/dev/javascript/lustre_sandbox/components/carousel.mjs
+function set_carousel_index(model, name, index3) {
+  let $ = unwrap(
+    get(model.state.carousels, name),
+    new CarouselState(0, toList([]), [false, 0])
+  );
+  {
+    let imgs = $.images;
+    let a2 = $.autoslide;
+    return insert(
+      model.state.carousels,
+      name,
+      new CarouselState(index3, imgs, a2)
+    );
+  }
+}
+function increment_carousel_index(model, name) {
+  let cstate = unwrap(
+    get(model.state.carousels, name),
+    new CarouselState(0, toList([]), [false, 0])
+  );
+  let $ = length(cstate.images);
+  if (cstate instanceof CarouselState && cstate.index < $ - 1) {
+    let n = cstate.index;
+    let imgs = cstate.images;
+    let a2 = cstate.autoslide;
+    let length4 = $;
+    return insert(
+      model.state.carousels,
+      name,
+      new CarouselState(n + 1, imgs, a2)
+    );
+  } else {
+    let imgs = cstate.images;
+    let a2 = cstate.autoslide;
+    return insert(
+      model.state.carousels,
+      name,
+      new CarouselState(0, imgs, a2)
+    );
+  }
+}
+function decrement_carousel_index(model, name) {
+  let cstate = unwrap(
+    get(model.state.carousels, name),
+    new CarouselState(0, toList([]), [false, 0])
+  );
+  let $ = length(cstate.images);
+  if (cstate instanceof CarouselState && cstate.index > 0) {
+    let n = cstate.index;
+    let imgs = cstate.images;
+    let a2 = cstate.autoslide;
+    return insert(
+      model.state.carousels,
+      name,
+      new CarouselState(n - 1, imgs, a2)
+    );
+  } else {
+    let imgs = cstate.images;
+    let a2 = cstate.autoslide;
+    let length4 = $;
+    return insert(
+      model.state.carousels,
+      name,
+      new CarouselState(length4 - 1, imgs, a2)
+    );
+  }
+}
+function message_handler(model, carouselmsg) {
+  if (carouselmsg instanceof SetSlide) {
+    let name = carouselmsg[0];
+    let index3 = carouselmsg[1];
+    return [
+      new Model2(
+        model.state.withFields({
+          carousels: set_carousel_index(model, name, index3)
+        })
+      ),
+      none()
+    ];
+  } else if (carouselmsg instanceof NextSlide) {
+    let name = carouselmsg[0];
+    return [
+      new Model2(
+        model.state.withFields({
+          carousels: increment_carousel_index(model, name)
+        })
+      ),
+      none()
+    ];
+  } else if (carouselmsg instanceof PreviousSlide) {
+    let name = carouselmsg[0];
+    return [
+      new Model2(
+        model.state.withFields({
+          carousels: decrement_carousel_index(model, name)
+        })
+      ),
+      none()
+    ];
+  } else if (carouselmsg instanceof StartAutoSlide) {
+    let name = carouselmsg[0];
+    let interval = carouselmsg[1];
+    return [model, none()];
+  } else {
+    let name = carouselmsg[0];
+    return [model, none()];
+  }
+}
+function carousel(model, name) {
+  let carousel_wrapper = style(
+    toList([
+      ["position", "relative"],
+      ["width", "40%"],
+      ["max_width", "400px"],
+      ["max-height", "300px"],
+      ["margin", "0 auto"],
+      ["overflow", "hidden"]
+    ])
+  );
+  let carousel_element = style(
+    toList([
+      ["display", "flex"],
+      ["transition", "transform 0.5s ease-in-out"],
+      [
+        "transform",
+        "translateX(" + to_string3(
+          unwrap(
+            get(model.state.carousels, name),
+            new CarouselState(0, toList([]), [true, 5e3])
+          ).index * -100
+        ) + "%)"
+      ]
+    ])
+  );
+  let carousel_button = style(
+    toList([
+      ["position", "absolute"],
+      ["top", "50%"],
+      ["transform", "translateY(-50%)"],
+      ["background-color", "rgba(0, 0, 0, 0.5)"],
+      ["color", "white"],
+      ["border", "none"],
+      ["padding", "10px 20px"],
+      ["cursor", "pointer"],
+      ["z-index", "1"]
+    ])
+  );
+  let carousel_dot = style(
+    toList([
+      ["position", "absolute"],
+      ["height", "40px"],
+      ["width", "40px"],
+      ["color", "white"],
+      ["fill", "white"],
+      ["border", "none"],
+      ["padding", "10px 20px"],
+      ["cursor", "pointer"],
+      ["z-index", "2"]
+    ])
+  );
+  let carousel_dot_wrapper = style(
+    toList([
+      ["display", "flex"],
+      ["justify-content", "center"],
+      ["width", "40px"],
+      ["height", "40px"],
+      ["text-align", "center"]
+    ])
+  );
+  let carousel_dots = style(
+    toList([
+      ["display", "flex"],
+      ["gap", "10px"],
+      ["background-color", "rgba(0, 0, 0, 0.5)"],
+      ["color", "white"],
+      ["border", "none"],
+      ["padding", "10px 20px"],
+      ["cursor", "pointer"],
+      ["z-index", "1"]
+    ])
+  );
+  let carousel_dots_wrapper = style(
+    toList([
+      ["position", "absolute"],
+      ["display", "flex"],
+      ["justify-content", "center"],
+      ["width", "100%"],
+      ["bottom", "10px"]
+    ])
+  );
+  let images = unwrap(
+    get(model.state.carousels, name),
+    new CarouselState(0, toList([]), [false, 0])
+  ).images;
+  return div(
+    toList([carousel_wrapper]),
+    toList([
+      div(
+        toList([carousel_element]),
+        map(
+          images,
+          (image) => {
+            return img(
+              toList([
+                src(image.location),
+                alt(image.title),
+                style(
+                  toList([["width", "100%"], ["flex-shrink", "0"]])
+                )
+              ])
+            );
+          }
+        )
+      ),
+      button(
+        toList([
+          carousel_button,
+          on_click(
+            new CarouselMessage(new PreviousSlide(name))
+          ),
+          style(toList([["left", "10px"]]))
+        ]),
+        toList([caret_left(toList([]))])
+      ),
+      button(
+        toList([
+          carousel_button,
+          on_click(new CarouselMessage(new NextSlide(name))),
+          style(toList([["right", "10px"]]))
+        ]),
+        toList([caret_right(toList([]))])
+      ),
+      div(
+        toList([carousel_dots_wrapper]),
+        toList([
+          div(
+            toList([carousel_dots]),
+            fold(
+              range(1, length(images)),
+              toList([]),
+              (dots, index3) => {
+                return append(
+                  dots,
+                  toList([
+                    div(
+                      toList([carousel_dot_wrapper]),
+                      toList([
+                        div(
+                          toList([
+                            on_click(
+                              new CarouselMessage(
+                                new SetSlide(name, index3 - 1)
+                              )
+                            ),
+                            carousel_dot
+                          ]),
+                          toList([text(to_string3(index3))])
+                        )
+                      ])
+                    )
+                  ])
+                );
+              }
+            )
+          )
+        ])
+      )
+    ])
+  );
+}
+
+// build/dev/javascript/lustre_sandbox/components/ints.mjs
+function message_handler2(model, intmsg) {
+  if (intmsg instanceof IntIncrement) {
+    let name = intmsg[0];
+    return [
+      new Model2(
+        model.state.withFields({
+          ints: map_values(
+            model.state.ints,
+            (k, v) => {
+              if (k === name) {
+                let n = k;
+                return v + 1;
+              } else {
+                return v;
+              }
+            }
+          )
+        })
+      ),
+      none()
+    ];
+  } else {
+    let name = intmsg[0];
+    return [
+      new Model2(
+        model.state.withFields({
+          ints: map_values(
+            model.state.ints,
+            (k, v) => {
+              if (k === name && v > 0) {
+                let n = k;
+                let i = v;
+                return v - 1;
+              } else {
+                return v;
+              }
+            }
+          )
+        })
+      ),
+      none()
+    ];
+  }
+}
+
+// build/dev/javascript/lustre_sandbox/lustre_sandbox/lib.mjs
+function set_interval(interval, msg) {
+  return from(
+    (dispatch) => {
+      setInterval(interval, () => {
+        return dispatch(msg);
+      });
+      return void 0;
+    }
+  );
+}
+function to_imageref(title, location) {
+  return new ImageRef(title, location);
+}
+function imageloader(image, width2, height2) {
+  return div(
+    toList([style(toList([["display", "flex"], ["flex-grow", "4"]]))]),
+    toList([
+      img(
+        toList([
+          src(image.location),
+          alt(image.title),
+          width(width2),
+          height(height2)
+        ])
+      )
+    ])
+  );
+}
+function do_element_clones(loop$amount, loop$element, loop$acc) {
+  while (true) {
+    let amount = loop$amount;
+    let element2 = loop$element;
+    let acc = loop$acc;
+    if (amount <= 0) {
+      let x = amount;
+      return acc;
+    } else {
+      loop$amount = amount - 1;
+      loop$element = element2;
+      loop$acc = flatten(toList([acc, toList([element2])]));
+    }
+  }
+}
+function element_clones(amount, element2) {
+  return do_element_clones(amount, element2, toList([]));
+}
+function input_box(model, name, placeholder2, attrs) {
+  let $ = get(model.state.inputs, name);
+  if ($.isOk() && $[0] !== "") {
+    let item = $[0];
+    return input3(
+      flatten(
+        toList([
+          toList([
+            on_input(
+              (_capture) => {
+                return new InputUpdate(name, _capture);
+              }
+            )
+          ]),
+          toList([value(item)]),
+          attrs,
+          toList([placeholder(placeholder2)])
+        ])
+      )
+    );
+  } else {
+    return input3(
+      flatten(
+        toList([
+          toList([
+            on_input(
+              (_capture) => {
+                return new InputUpdate(name, _capture);
+              }
+            )
+          ]),
+          attrs,
+          toList([placeholder(placeholder2)])
+        ])
+      )
+    );
+  }
+}
+
+// build/dev/javascript/lustre_sandbox/components/footer.mjs
+function footer(model) {
+  return div(
+    toList([
+      style(
+        toList([
+          ["height", "5rem"],
+          [
+            "background",
+            (() => {
+              let $ = get(model.state.inputs, "colour");
+              if ($.isOk() && $[0] === "red") {
+                return "#552222";
+              } else {
+                return "";
+              }
+            })()
+          ]
+        ])
+      )
+    ]),
+    toList([p(toList([]), toList([text("footer")]))])
+  );
 }
 
 // build/dev/javascript/lustre_sandbox/components/navbar.mjs
@@ -4021,82 +4412,6 @@ function about(model) {
   );
 }
 
-// build/dev/javascript/lustre_sandbox/lustre_sandbox/lib.mjs
-function to_imageref(title, location) {
-  return new ImageRef(title, location);
-}
-function imageloader(image, width2, height2) {
-  return div(
-    toList([style(toList([["display", "flex"], ["flex-grow", "4"]]))]),
-    toList([
-      img(
-        toList([
-          src(image.location),
-          alt(image.title),
-          width(width2),
-          height(height2)
-        ])
-      )
-    ])
-  );
-}
-function do_element_clones(loop$amount, loop$element, loop$acc) {
-  while (true) {
-    let amount = loop$amount;
-    let element2 = loop$element;
-    let acc = loop$acc;
-    if (amount <= 0) {
-      let x = amount;
-      return acc;
-    } else {
-      loop$amount = amount - 1;
-      loop$element = element2;
-      loop$acc = flatten(toList([acc, toList([element2])]));
-    }
-  }
-}
-function element_clones(amount, element2) {
-  return do_element_clones(amount, element2, toList([]));
-}
-function input_box(model, name, placeholder2, attrs) {
-  let $ = get(model.state.inputs, name);
-  if ($.isOk() && $[0] !== "") {
-    let item = $[0];
-    return input3(
-      flatten(
-        toList([
-          toList([
-            on_input(
-              (_capture) => {
-                return new InputUpdate(name, _capture);
-              }
-            )
-          ]),
-          toList([value(item)]),
-          attrs,
-          toList([placeholder(placeholder2)])
-        ])
-      )
-    );
-  } else {
-    return input3(
-      flatten(
-        toList([
-          toList([
-            on_input(
-              (_capture) => {
-                return new InputUpdate(name, _capture);
-              }
-            )
-          ]),
-          attrs,
-          toList([placeholder(placeholder2)])
-        ])
-      )
-    );
-  }
-}
-
 // build/dev/javascript/lustre_sandbox/pages/index.mjs
 function index2(model) {
   return div(
@@ -4276,7 +4591,7 @@ function index2(model) {
             }
           })()
         ]),
-        toList([carousel(model, "test", model.state.images)])
+        toList([carousel(model, "test")])
       ),
       div(
         toList([
@@ -4408,17 +4723,9 @@ function initial_state() {
     images,
     new$(),
     from_list(toList([["icons", 5], ["fizzbuzz", 10]])),
-    new$()
-  );
-}
-function set_interval(interval, msg) {
-  return from(
-    (dispatch) => {
-      setInterval(interval, () => {
-        return dispatch(msg);
-      });
-      return void 0;
-    }
+    from_list(
+      toList([["test", new CarouselState(0, images, [true, 5e3])]])
+    )
   );
 }
 function on_url_change(uri) {
@@ -4496,7 +4803,7 @@ function main() {
     throw makeError(
       "assignment_no_match",
       "lustre_sandbox",
-      25,
+      26,
       "main",
       "Assignment pattern did not match",
       { value: $ }
