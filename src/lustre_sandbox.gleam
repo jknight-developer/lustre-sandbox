@@ -58,7 +58,7 @@ pub fn initial_state() {
     inputs: dict.new(),
     images: images,
     ints: dict.from_list([#("icons", 5), #("fizzbuzz", 10)]),
-    carousels: dict.from_list([#("test", types.CarouselState(0, images, #(True, 5000)))]),
+    carousels: dict.from_list([#("test", types.CarouselState(0, images, True))]),
   )
 }
 
@@ -68,6 +68,7 @@ fn init(_) -> #(Model, Effect(Msg)) {
     effect.batch([
       modem.init(on_url_change),
       lib.set_interval(1000, msg.IntMessage(msg.IntIncrement("fizzbuzz"))),
+      lib.set_interval(5000, msg.CarouselMessage(msg.NextSlideIfAuto("test"))),
     ]),
   )
 }

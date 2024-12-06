@@ -13,6 +13,7 @@ pub type Route {
 
 pub type CarouselMsg {
   NextSlide(String)
+  NextSlideIfAuto(String)
   PreviousSlide(String)
   SetSlide(String, Int)
   StartAutoSlide(String, Int)

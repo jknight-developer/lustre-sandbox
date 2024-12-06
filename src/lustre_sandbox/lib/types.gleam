@@ -22,5 +22,5 @@ pub type ImageRef {
 }
 
 pub type CarouselState {
-  CarouselState(index: Int, images: List(ImageRef), autoslide: #(Bool, Int))
+  CarouselState(index: Int, images: List(ImageRef), autoslide: Bool)
 }

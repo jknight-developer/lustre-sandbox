@@ -3494,6 +3494,16 @@ function on_click(msg) {
     return new Ok(msg);
   });
 }
+function on_mouse_enter(msg) {
+  return on2("mouseenter", (_) => {
+    return new Ok(msg);
+  });
+}
+function on_mouse_leave(msg) {
+  return on2("mouseleave", (_) => {
+    return new Ok(msg);
+  });
+}
 function value2(event2) {
   let _pipe = event2;
   return field("target", field("value", string))(
@@ -3654,6 +3664,12 @@ var NextSlide = class extends CustomType {
     this[0] = x0;
   }
 };
+var NextSlideIfAuto = class extends CustomType {
+  constructor(x0) {
+    super();
+    this[0] = x0;
+  }
+};
 var PreviousSlide = class extends CustomType {
   constructor(x0) {
     super();
@@ -3672,6 +3688,12 @@ var StartAutoSlide = class extends CustomType {
     super();
     this[0] = x0;
     this[1] = x1;
+  }
+};
+var PauseAutoSlide = class extends CustomType {
+  constructor(x0) {
+    super();
+    this[0] = x0;
   }
 };
 var IntIncrement = class extends CustomType {
@@ -3721,11 +3743,97 @@ var CarouselState = class extends CustomType {
   }
 };
 
+// build/dev/javascript/lustre_sandbox/lustre_sandbox/lib.mjs
+function set_interval(interval, msg) {
+  return from(
+    (dispatch) => {
+      setInterval(interval, () => {
+        return dispatch(msg);
+      });
+      return void 0;
+    }
+  );
+}
+function to_imageref(title, location) {
+  return new ImageRef(title, location);
+}
+function imageloader(image, width2, height2) {
+  return div(
+    toList([style(toList([["display", "flex"], ["flex-grow", "4"]]))]),
+    toList([
+      img(
+        toList([
+          src(image.location),
+          alt(image.title),
+          width(width2),
+          height(height2)
+        ])
+      )
+    ])
+  );
+}
+function do_element_clones(loop$amount, loop$element, loop$acc) {
+  while (true) {
+    let amount = loop$amount;
+    let element2 = loop$element;
+    let acc = loop$acc;
+    if (amount <= 0) {
+      let x = amount;
+      return acc;
+    } else {
+      loop$amount = amount - 1;
+      loop$element = element2;
+      loop$acc = flatten(toList([acc, toList([element2])]));
+    }
+  }
+}
+function element_clones(amount, element2) {
+  return do_element_clones(amount, element2, toList([]));
+}
+function input_box(model, name, placeholder2, attrs) {
+  let $ = get(model.state.inputs, name);
+  if ($.isOk() && $[0] !== "") {
+    let item = $[0];
+    return input3(
+      flatten(
+        toList([
+          toList([
+            on_input(
+              (_capture) => {
+                return new InputUpdate(name, _capture);
+              }
+            )
+          ]),
+          toList([value(item)]),
+          attrs,
+          toList([placeholder(placeholder2)])
+        ])
+      )
+    );
+  } else {
+    return input3(
+      flatten(
+        toList([
+          toList([
+            on_input(
+              (_capture) => {
+                return new InputUpdate(name, _capture);
+              }
+            )
+          ]),
+          attrs,
+          toList([placeholder(placeholder2)])
+        ])
+      )
+    );
+  }
+}
+
 // build/dev/javascript/lustre_sandbox/components/carousel.mjs
 function set_carousel_index(model, name, index3) {
   let $ = unwrap(
     get(model.state.carousels, name),
-    new CarouselState(0, toList([]), [false, 0])
+    new CarouselState(0, toList([]), false)
   );
   {
     let imgs = $.images;
@@ -3740,7 +3848,7 @@ function set_carousel_index(model, name, index3) {
 function increment_carousel_index(model, name) {
   let cstate = unwrap(
     get(model.state.carousels, name),
-    new CarouselState(0, toList([]), [false, 0])
+    new CarouselState(0, toList([]), false)
   );
   let $ = length(cstate.images);
   if (cstate instanceof CarouselState && cstate.index < $ - 1) {
@@ -3763,10 +3871,38 @@ function increment_carousel_index(model, name) {
     );
   }
 }
+function increment_carousel_index_if_auto(model, name) {
+  let cstate = unwrap(
+    get(model.state.carousels, name),
+    new CarouselState(0, toList([]), false)
+  );
+  let $ = length(cstate.images);
+  if (cstate instanceof CarouselState && (cstate.index < $ - 1 && cstate.autoslide)) {
+    let n = cstate.index;
+    let imgs = cstate.images;
+    let b = cstate.autoslide;
+    let length4 = $;
+    return insert(
+      model.state.carousels,
+      name,
+      new CarouselState(n + 1, imgs, b)
+    );
+  } else if (cstate instanceof CarouselState && cstate.autoslide) {
+    let imgs = cstate.images;
+    let b = cstate.autoslide;
+    return insert(
+      model.state.carousels,
+      name,
+      new CarouselState(0, imgs, b)
+    );
+  } else {
+    return model.state.carousels;
+  }
+}
 function decrement_carousel_index(model, name) {
   let cstate = unwrap(
     get(model.state.carousels, name),
-    new CarouselState(0, toList([]), [false, 0])
+    new CarouselState(0, toList([]), false)
   );
   let $ = length(cstate.images);
   if (cstate instanceof CarouselState && cstate.index > 0) {
@@ -3786,6 +3922,36 @@ function decrement_carousel_index(model, name) {
       model.state.carousels,
       name,
       new CarouselState(length4 - 1, imgs, a2)
+    );
+  }
+}
+function start_auto_slide(model, name, interval) {
+  let cstate = unwrap(
+    get(model.state.carousels, name),
+    new CarouselState(0, toList([]), false)
+  );
+  {
+    let n = cstate.index;
+    let imgs = cstate.images;
+    return insert(
+      model.state.carousels,
+      name,
+      new CarouselState(n, imgs, true)
+    );
+  }
+}
+function pause_auto_slide(model, name) {
+  let cstate = unwrap(
+    get(model.state.carousels, name),
+    new CarouselState(0, toList([]), false)
+  );
+  {
+    let n = cstate.index;
+    let imgs = cstate.images;
+    return insert(
+      model.state.carousels,
+      name,
+      new CarouselState(n, imgs, false)
     );
   }
 }
@@ -3811,6 +3977,16 @@ function message_handler(model, carouselmsg) {
       ),
       none()
     ];
+  } else if (carouselmsg instanceof NextSlideIfAuto) {
+    let name = carouselmsg[0];
+    return [
+      new Model2(
+        model.state.withFields({
+          carousels: increment_carousel_index_if_auto(model, name)
+        })
+      ),
+      none()
+    ];
   } else if (carouselmsg instanceof PreviousSlide) {
     let name = carouselmsg[0];
     return [
@@ -3824,10 +4000,22 @@ function message_handler(model, carouselmsg) {
   } else if (carouselmsg instanceof StartAutoSlide) {
     let name = carouselmsg[0];
     let interval = carouselmsg[1];
-    return [model, none()];
+    return [
+      new Model2(
+        model.state.withFields({
+          carousels: start_auto_slide(model, name, interval)
+        })
+      ),
+      none()
+    ];
   } else {
     let name = carouselmsg[0];
-    return [model, none()];
+    return [
+      new Model2(
+        model.state.withFields({ carousels: pause_auto_slide(model, name) })
+      ),
+      none()
+    ];
   }
 }
 function carousel(model, name) {
@@ -3850,7 +4038,7 @@ function carousel(model, name) {
         "translateX(" + to_string3(
           unwrap(
             get(model.state.carousels, name),
-            new CarouselState(0, toList([]), [true, 5e3])
+            new CarouselState(0, toList([]), true)
           ).index * -100
         ) + "%)"
       ]
@@ -3914,10 +4102,18 @@ function carousel(model, name) {
   );
   let images = unwrap(
     get(model.state.carousels, name),
-    new CarouselState(0, toList([]), [false, 0])
+    new CarouselState(0, toList([]), false)
   ).images;
   return div(
-    toList([carousel_wrapper]),
+    toList([
+      carousel_wrapper,
+      on_mouse_enter(
+        new CarouselMessage(new PauseAutoSlide(name))
+      ),
+      on_mouse_leave(
+        new CarouselMessage(new StartAutoSlide(name, 0))
+      )
+    ]),
     toList([
       div(
         toList([carousel_element]),
@@ -4036,92 +4232,6 @@ function message_handler2(model, intmsg) {
       ),
       none()
     ];
-  }
-}
-
-// build/dev/javascript/lustre_sandbox/lustre_sandbox/lib.mjs
-function set_interval(interval, msg) {
-  return from(
-    (dispatch) => {
-      setInterval(interval, () => {
-        return dispatch(msg);
-      });
-      return void 0;
-    }
-  );
-}
-function to_imageref(title, location) {
-  return new ImageRef(title, location);
-}
-function imageloader(image, width2, height2) {
-  return div(
-    toList([style(toList([["display", "flex"], ["flex-grow", "4"]]))]),
-    toList([
-      img(
-        toList([
-          src(image.location),
-          alt(image.title),
-          width(width2),
-          height(height2)
-        ])
-      )
-    ])
-  );
-}
-function do_element_clones(loop$amount, loop$element, loop$acc) {
-  while (true) {
-    let amount = loop$amount;
-    let element2 = loop$element;
-    let acc = loop$acc;
-    if (amount <= 0) {
-      let x = amount;
-      return acc;
-    } else {
-      loop$amount = amount - 1;
-      loop$element = element2;
-      loop$acc = flatten(toList([acc, toList([element2])]));
-    }
-  }
-}
-function element_clones(amount, element2) {
-  return do_element_clones(amount, element2, toList([]));
-}
-function input_box(model, name, placeholder2, attrs) {
-  let $ = get(model.state.inputs, name);
-  if ($.isOk() && $[0] !== "") {
-    let item = $[0];
-    return input3(
-      flatten(
-        toList([
-          toList([
-            on_input(
-              (_capture) => {
-                return new InputUpdate(name, _capture);
-              }
-            )
-          ]),
-          toList([value(item)]),
-          attrs,
-          toList([placeholder(placeholder2)])
-        ])
-      )
-    );
-  } else {
-    return input3(
-      flatten(
-        toList([
-          toList([
-            on_input(
-              (_capture) => {
-                return new InputUpdate(name, _capture);
-              }
-            )
-          ]),
-          attrs,
-          toList([placeholder(placeholder2)])
-        ])
-      )
-    );
   }
 }
 
@@ -4724,7 +4834,7 @@ function initial_state() {
     new$(),
     from_list(toList([["icons", 5], ["fizzbuzz", 10]])),
     from_list(
-      toList([["test", new CarouselState(0, images, [true, 5e3])]])
+      toList([["test", new CarouselState(0, images, true)]])
     )
   );
 }
@@ -4748,6 +4858,10 @@ function init3(_) {
         set_interval(
           1e3,
           new IntMessage(new IntIncrement("fizzbuzz"))
+        ),
+        set_interval(
+          5e3,
+          new CarouselMessage(new NextSlideIfAuto("test"))
         )
       ])
     )
