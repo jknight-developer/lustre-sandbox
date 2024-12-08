@@ -296,7 +296,7 @@ pub fn carousel(model: Model, name: String) -> Element(Msg) {
                     ),
                     carousel_dot,
                   ],
-                  [element.text(int.to_string(index))],
+                  insert_dot(model, name, index),
                 ),
               ]),
             ])
@@ -305,4 +305,18 @@ pub fn carousel(model: Model, name: String) -> Element(Msg) {
       ]),
     ],
   )
+}
+
+fn insert_dot(model: Model, carousel_name: String, index: Int) {
+  case
+    result.unwrap(
+      dict.get(model.state.carousels, carousel_name),
+      CarouselState(0, [], False),
+    )
+  {
+    CarouselState(i, _, _) if i == index - 1 -> [
+      html.strong([], [element.text(int.to_string(index))]),
+    ]
+    _ -> [element.text(int.to_string(index))]
+  }
 }
