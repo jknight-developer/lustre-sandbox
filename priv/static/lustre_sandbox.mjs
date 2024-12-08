@@ -4018,6 +4018,20 @@ function message_handler(model, carouselmsg) {
     ];
   }
 }
+function insert_dot(model, carousel_name, index3) {
+  let $ = unwrap(
+    get(model.state.carousels, carousel_name),
+    new CarouselState(0, toList([]), false)
+  );
+  if ($ instanceof CarouselState && $.index === index3 - 1) {
+    let i = $.index;
+    return toList([
+      strong(toList([]), toList([text(to_string3(index3))]))
+    ]);
+  } else {
+    return toList([text(to_string3(index3))]);
+  }
+}
 function carousel(model, name) {
   let carousel_wrapper = style(
     toList([
@@ -4174,7 +4188,7 @@ function carousel(model, name) {
                             ),
                             carousel_dot
                           ]),
-                          toList([text(to_string3(index3))])
+                          insert_dot(model, name, index3)
                         )
                       ])
                     )
@@ -4817,8 +4831,12 @@ function initial_state() {
     "street",
     "https://images.unsplash.com/photo-1731978009363-21fa723e2cbe?q=80&w=1935&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
   );
+  let test_image3 = new ImageRef(
+    "street",
+    "https://images.unsplash.com/photo-1733159775371-d70b9d6b1057?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+  );
   let local_image = new ImageRef("local", "./image.jpeg");
-  let images = toList([test_image2, local_image, test_image]);
+  let images = toList([test_image2, test_image3, local_image, test_image]);
   let theme2 = new Theme(
     purple(),
     grey(),
