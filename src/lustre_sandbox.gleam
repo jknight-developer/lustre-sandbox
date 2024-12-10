@@ -44,8 +44,7 @@ pub fn initial_state() {
       title: "street",
       location: "https://images.unsplash.com/photo-1733159775371-d70b9d6b1057?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     )
-  let local_image = ImageRef(title: "local", location: "./image.jpeg")
-  let images = [test_image2, test_image3, local_image, test_image]
+  let images = [test_image2, test_image3, test_image]
 
   let theme =
     Theme(
@@ -83,6 +82,7 @@ fn on_url_change(uri: Uri) -> Msg {
   case uri.path_segments(uri.path) {
     ["lustre-sandbox", "index"] -> msg.OnRouteChange(msg.Index)
     ["lustre-sandbox", "about"] -> msg.OnRouteChange(msg.About)
+    ["lustre-sandbox", "songs"] -> msg.OnRouteChange(msg.Songs)
     _ -> msg.OnRouteChange(msg.Index)
   }
 }

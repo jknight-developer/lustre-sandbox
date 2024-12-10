@@ -2763,6 +2763,9 @@ function solid() {
 function outline() {
   return class$("outline");
 }
+function greyscale() {
+  return attribute("data-variant", "greyscale");
+}
 function error() {
   return attribute("data-variant", "error");
 }
@@ -3284,10 +3287,10 @@ function full() {
 
 // build/dev/javascript/lustre_ui/lustre/ui.mjs
 var Theme = class extends CustomType {
-  constructor(primary2, greyscale, error2, warning2, success2, info2) {
+  constructor(primary2, greyscale2, error2, warning2, success2, info2) {
     super();
     this.primary = primary2;
-    this.greyscale = greyscale;
+    this.greyscale = greyscale2;
     this.error = error2;
     this.warning = warning2;
     this.success = success2;
@@ -3657,6 +3660,8 @@ var CarouselMessage = class extends CustomType {
 var Index = class extends CustomType {
 };
 var About = class extends CustomType {
+};
+var Songs = class extends CustomType {
 };
 var NextSlide = class extends CustomType {
   constructor(x0) {
@@ -4344,6 +4349,16 @@ function navbar(model) {
                   toList([text("About")])
                 )
               ])
+            ),
+            a(toList([]), toList([text(" | ")])),
+            a(
+              toList([href("/lustre-sandbox/songs")]),
+              toList([
+                button3(
+                  toList([greyscale(), outline()]),
+                  toList([text("Songs")])
+                )
+              ])
             )
           ])
         )
@@ -4785,6 +4800,11 @@ function index2(model) {
   );
 }
 
+// build/dev/javascript/lustre_sandbox/pages/songs.mjs
+function songs(model) {
+  return div(toList([]), toList([]));
+}
+
 // build/dev/javascript/lustre_sandbox/pages/app.mjs
 function app(model) {
   return div(
@@ -4810,8 +4830,10 @@ function app(model) {
             let $ = model.state.route;
             if ($ instanceof Index) {
               return index2(model);
-            } else {
+            } else if ($ instanceof About) {
               return about(model);
+            } else {
+              return songs(model);
             }
           })()
         ])
@@ -4835,8 +4857,7 @@ function initial_state() {
     "street",
     "https://images.unsplash.com/photo-1733159775371-d70b9d6b1057?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
   );
-  let local_image = new ImageRef("local", "./image.jpeg");
-  let images = toList([test_image2, test_image3, local_image, test_image]);
+  let images = toList([test_image2, test_image3, test_image]);
   let theme2 = new Theme(
     purple(),
     grey(),
@@ -4863,6 +4884,8 @@ function on_url_change(uri) {
     return new OnRouteChange(new Index());
   } else if ($.hasLength(2) && $.head === "lustre-sandbox" && $.tail.head === "about") {
     return new OnRouteChange(new About());
+  } else if ($.hasLength(2) && $.head === "lustre-sandbox" && $.tail.head === "songs") {
+    return new OnRouteChange(new Songs());
   } else {
     return new OnRouteChange(new Index());
   }

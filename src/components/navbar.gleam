@@ -55,6 +55,12 @@ pub fn navbar(model: Model) -> Element(Msg) {
             element.text("About"),
           ]),
         ]),
+        html.a([], [element.text(" | ")]),
+        html.a([attribute.href("/lustre-sandbox/songs")], [
+          ui.button([button.greyscale(), button.outline()], [
+            element.text("Songs"),
+          ]),
+        ]),
       ]),
     ),
     html.hr([attribute.style([#("opacity", "0")])]),

@@ -24,3 +24,10 @@ pub type ImageRef {
 pub type CarouselState {
   CarouselState(index: Int, images: List(ImageRef), autoslide: Bool)
 }
+
+pub type Song {
+  Song(
+    title: String,
+    pdf: BitArray
+  )
+}

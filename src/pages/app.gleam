@@ -7,8 +7,9 @@ import lustre/element.{type Element}
 import lustre/element/html
 import lustre_sandbox/lib/msg.{type Msg}
 import lustre_sandbox/lib/types.{type Model}
-import pages/about
 import pages/index
+import pages/about
+import pages/songs
 
 pub fn app(model: Model) -> Element(Msg) {
   html.div([], [
@@ -30,6 +31,7 @@ pub fn app(model: Model) -> Element(Msg) {
         case model.state.route {
           msg.Index -> index.index(model)
           msg.About -> about.about(model)
+          msg.Songs -> songs.songs(model)
         },
       ],
     ),

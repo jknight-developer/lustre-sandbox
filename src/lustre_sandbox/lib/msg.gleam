@@ -9,6 +9,7 @@ pub type Msg {
 pub type Route {
   Index
   About
+  Songs
 }
 
 pub type CarouselMsg {
